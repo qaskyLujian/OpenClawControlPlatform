@@ -1,0 +1,311 @@
+import { useState, useEffect } from 'react';
+import { Card, Row, Col, Statistic, Badge, Progress } from 'antd';
+import { getDashboardData } from '../services/api';
+import { socket } from '../services/socket';
+import '../cyberpunk.css';
+
+interface DashboardData {
+  gateway: {
+    status: 'running' | 'stopped' | 'error';
+    uptime: string;
+    pid: number | null;
+  };
+  sessions: {
+    total: number;
+    active: number;
+    subagents: number;
+  };
+  usage: {
+    tokensToday: number;
+    requestsToday: number;
+  };
+  system: {
+    cpu: number;
+    memory: number;
+  };
+}
+
+export default function Dashboard() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadDashboard();
+    socket.emit('subscribe:dashboard');
+    socket.on('dashboard:update', (newData: DashboardData) => {
+      setData(newData);
+    });
+
+    return () => {
+      socket.off('dashboard:update');
+    };
+  }, []);
+
+  const loadDashboard = async () => {
+    try {
+      const response = await getDashboardData();
+      setData(response.data);
+    } catch (error) {
+      console.error('Failed to load dashboard:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: 'calc(100vh - 64px)',
+        color: '#4dd0e1',
+        fontSize: 24,
+        fontFamily: 'Courier New, monospace'
+      }}>
+        <div className="pulse">LOADING SYSTEM DATA...</div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return <div style={{ padding: 24, color: '#f48fb1' }}>NO DATA AVAILABLE</div>;
+  }
+
+  const getStatusColor = (status: string) => {
+    return status === 'running' ? '#81c784' : '#ff0055';
+  };
+
+  return (
+    <div style={{ 
+      padding: '24px',
+      background: '#0d1117',
+      minHeight: 'calc(100vh - 64px)',
+      position: 'relative'
+    }}>
+      <div className="scanline" />
+      
+      {/* Header */}
+      <div style={{
+        marginBottom: 30,
+        padding: '24px',
+        background: 'rgba(0, 240, 255, 0.05)',
+        border: '1px solid #4dd0e1',
+        borderRadius: '10px',
+        position: 'relative'
+      }}>
+        <h2 className="neon-text" style={{
+          margin: 0,
+          fontSize: 32,
+          fontFamily: 'Courier New, monospace',
+          letterSpacing: '3px'
+        }}>
+          系统监控
+        </h2>
+        <div className="pulse" style={{
+          position: 'absolute',
+          top: '50%',
+          right: '24px',
+          transform: 'translateY(-50%)',
+          color: '#81c784',
+          fontSize: 13,
+          fontFamily: 'Courier New, monospace'
+        }}>
+          ● 实时数据
+        </div>
+      </div>
+
+      <Row gutter={[24, 24]}>
+        {/* Gateway Status */}
+        <Col span={6}>
+          <div className="cyber-card" style={{
+            padding: '28px',
+            borderRadius: '10px',
+            height: '100%'
+          }}>
+            <div style={{
+              color: '#4dd0e1',
+              fontSize: 13,
+              marginBottom: 16,
+              fontFamily: 'Courier New, monospace',
+              letterSpacing: '2px'
+            }}>
+              [ 网关状态 ]
+            </div>
+            <div style={{
+              fontSize: 38,
+              fontWeight: 'bold',
+              color: getStatusColor(data.gateway.status),
+              textShadow: `0 0 20px ${getStatusColor(data.gateway.status)}`,
+              fontFamily: 'Courier New, monospace',
+              marginBottom: 12
+            }}>
+              {data.gateway.status === 'running' ? '运行中' : '已停止'}
+            </div>
+            <div style={{
+              color: '#666',
+              fontSize: 12,
+              fontFamily: 'Courier New, monospace'
+            }}>
+              运行时间: {data.gateway.uptime}
+              {data.gateway.pid && ` | PID: ${data.gateway.pid}`}
+            </div>
+          </div>
+        </Col>
+
+        {/* Sessions */}
+        <Col span={6}>
+          <div className="cyber-card" style={{
+            padding: '28px',
+            borderRadius: '10px',
+            height: '100%',
+            borderColor: '#f48fb1'
+          }}>
+            <div style={{
+              color: '#f48fb1',
+              fontSize: 13,
+              marginBottom: 16,
+              fontFamily: 'Courier New, monospace',
+              letterSpacing: '2px'
+            }}>
+              [ 会话统计 ]
+            </div>
+            <div style={{
+              fontSize: 48,
+              fontWeight: 'bold',
+              color: '#f48fb1',
+              textShadow: '0 0 20px #f48fb1',
+              fontFamily: 'Courier New, monospace',
+              marginBottom: 12
+            }}>
+              {data.sessions.total}
+            </div>
+            <div style={{
+              color: '#81c784',
+              fontSize: 13,
+              fontFamily: 'Courier New, monospace'
+            }}>
+              活跃: {data.sessions.active} | 子代理: {data.sessions.subagents}
+            </div>
+          </div>
+        </Col>
+
+        {/* Tokens */}
+        <Col span={6}>
+          <div className="cyber-card" style={{
+            padding: '28px',
+            borderRadius: '10px',
+            height: '100%',
+            borderColor: '#81c784'
+          }}>
+            <div style={{
+              color: '#81c784',
+              fontSize: 13,
+              marginBottom: 16,
+              fontFamily: 'Courier New, monospace',
+              letterSpacing: '2px'
+            }}>
+              [ 今日消耗 ]
+            </div>
+            <div style={{
+              fontSize: 32,
+              fontWeight: 'bold',
+              color: '#81c784',
+              textShadow: '0 0 20px #81c784',
+              fontFamily: 'Courier New, monospace',
+              marginBottom: 12
+            }}>
+              {(data.usage.tokensToday / 1000000).toFixed(2)}M
+            </div>
+            <div style={{
+              color: '#666',
+              fontSize: 12,
+              fontFamily: 'Courier New, monospace'
+            }}>
+              请求次数: {data.usage.requestsToday}
+            </div>
+          </div>
+        </Col>
+
+        {/* System Resources */}
+        <Col span={6}>
+          <div className="cyber-card" style={{
+            padding: '28px',
+            borderRadius: '10px',
+            height: '100%',
+            borderColor: '#fff176'
+          }}>
+            <div style={{
+              color: '#fff176',
+              fontSize: 13,
+              marginBottom: 16,
+              fontFamily: 'Courier New, monospace',
+              letterSpacing: '2px'
+            }}>
+              [ 系统资源 ]
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <div style={{
+                color: '#4dd0e1',
+                fontSize: 12,
+                marginBottom: 6,
+                fontFamily: 'Courier New, monospace'
+              }}>
+                CPU: {data.system.cpu}%
+              </div>
+              <Progress 
+                percent={data.system.cpu} 
+                strokeColor={{
+                  '0%': '#4dd0e1',
+                  '100%': '#f48fb1',
+                }}
+                trailColor="rgba(0, 240, 255, 0.1)"
+                showInfo={false}
+                strokeWidth={8}
+              />
+            </div>
+            <div>
+              <div style={{
+                color: '#f48fb1',
+                fontSize: 12,
+                marginBottom: 6,
+                fontFamily: 'Courier New, monospace'
+              }}>
+                内存: {data.system.memory}%
+              </div>
+              <Progress 
+                percent={data.system.memory} 
+                strokeColor={{
+                  '0%': '#f48fb1',
+                  '100%': '#fff176',
+                }}
+                trailColor="rgba(255, 0, 255, 0.1)"
+                showInfo={false}
+                strokeWidth={8}
+              />
+            </div>
+          </div>
+        </Col>
+      </Row>
+
+      {/* System Info Banner */}
+      <div style={{
+        marginTop: 30,
+        padding: '16px 24px',
+        background: 'rgba(0, 255, 65, 0.05)',
+        border: '1px solid #81c784',
+        borderRadius: '10px',
+        fontFamily: 'Courier New, monospace',
+        fontSize: 13,
+        color: '#81c784',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <span className="pulse">● 系统在线</span>
+        <span>自动刷新: 5秒</span>
+        <span>最后更新: {new Date().toLocaleTimeString()}</span>
+      </div>
+    </div>
+  );
+}
