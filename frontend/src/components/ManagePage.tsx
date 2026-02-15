@@ -1159,7 +1159,11 @@ export default function ManagePage() {
                   暂无定时任务，点击"添加"创建
                 </div>
               ) : cronJobs.map((job) => (
-                <div key={job.id} className="figma-card" style={{ padding: 'var(--space-3)', marginBottom: 8 }}>
+                <div key={job.id} className="figma-card" style={{ 
+                  padding: 'var(--space-3)', marginBottom: 8,
+                  opacity: job.enabled ? 1 : 0.6,
+                  background: job.enabled ? 'var(--bg-secondary)' : 'var(--bg-primary)'
+                }}>
                   {editingCronId === job.id ? (
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 600, color: '#fff', marginBottom: 8 }}>编辑任务</div>
@@ -1246,6 +1250,9 @@ export default function ManagePage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <Switch size="small" checked={job.enabled} onChange={() => handleToggleCron(job)} />
                         <span style={{ fontSize: 13, fontWeight: 600, color: job.enabled ? '#fff' : '#666' }}>{job.name}</span>
+                        {!job.enabled && (
+                          <span className="figma-badge figma-badge-gray" style={{ fontSize: 9 }}>已停用</span>
+                        )}
                         <span className="figma-badge figma-badge-blue" style={{ fontSize: 10 }}>{(() => {
                           const s = job.schedule;
                           if (!s) return '?';

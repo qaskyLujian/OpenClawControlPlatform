@@ -88,7 +88,7 @@ router.get('/', async (req, res) => {
     // 通过 CLI 获取真实 cron jobs
     let cronJobs: any[] = [];
     try {
-      const output = await cronExec('list --json');
+      const output = await cronExec('list --json --all');
       const parsed = JSON.parse(output);
       cronJobs = (parsed.jobs || []).map((job: any) => ({
         id: job.id,
