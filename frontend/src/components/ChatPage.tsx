@@ -354,11 +354,16 @@ export default function ChatPage() {
           </div>
         )}
 
-        {/* 待上传文件预览 */}
+        {/* 待上传文件预览 - 固定在输入框上方 */}
         {pendingFiles.length > 0 && (
           <div style={{
-            padding: '8px var(--space-4)', borderTop: '1px solid var(--border-subtle)',
-            background: 'var(--bg-primary)', display: 'flex', flexWrap: 'wrap', gap: 6
+            padding: '8px var(--space-4)', 
+            borderTop: '1px solid var(--border-subtle)',
+            background: 'var(--bg-primary)', 
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            gap: 6,
+            flexShrink: 0
           }}>
             {pendingFiles.map((f, i) => (
               <div key={i} style={{
@@ -379,8 +384,14 @@ export default function ChatPage() {
           </div>
         )}
 
-        {/* 输入区域 */}
-        <div style={{ padding: 'var(--space-3) var(--space-4)', borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-secondary)' }}>
+        {/* 输入区域 - 固定在底部 */}
+        <div style={{ 
+          padding: 'var(--space-3) var(--space-4)', 
+          borderTop: '2px solid var(--border-default)', 
+          background: 'var(--bg-secondary)',
+          boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.1)',
+          flexShrink: 0
+        }}>
           <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'flex-end' }}>
             <input type="file" ref={fileInputRef} multiple onChange={handleFileSelect}
               accept="image/*,.pdf,.csv,.xlsx,.json,.txt,.md,.html,.py,.js,.ts,.zip,.docx"
