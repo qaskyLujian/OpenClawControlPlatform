@@ -1,14 +1,14 @@
 import express from 'express';
-import { spawn } from 'child_process';
+import { exec, spawn } from 'child_process';
+import { promisify } from 'util';
 
+const execAsync = promisify(exec);
 const router = express.Router();
 
-// 存储当前的认证会话
 let authProcess: any = null;
-let qrCodeText: string | null = null;
 let authStatus: 'idle' | 'waiting' | 'success' | 'failed' | 'timeout' = 'idle';
 
-// 启动 WhatsApp 认证并捕获二维码
+// 打开终端窗口显示二维码
 router.post('/auth/start', async (req, res) => {
   try {
     // 如果已有进程在运行，先清理
@@ -18,91 +18,46 @@ router.post('/auth/start', async (req, res) => {
     }
 
     authStatus = 'waiting';
-    qrCodeText = null;
 
-    // 启动 wacli auth
-    authProcess = spawn('wacli', ['auth'], {
-      env: { ...process.env }
-    });
-
-    let fullOutput = '';
-    let qrStarted = false;
-    let qrLines: string[] = [];
-    let captureQR = false;
-
-    authProcess.stdout.on('data', (data: Buffer) => {
-      const text = data.toString();
-      fullOutput += text;
-      processOutput(text);
-    });
-
-    authProcess.stderr.on('data', (data: Buffer) => {
-      const text = data.toString();
-      fullOutput += text;
-      processOutput(text);
-    });
-
-    // 处理输出的函数
-    function processOutput(text: string) {
-      // 检测二维码开始标记
-      if (text.includes('Scan this QR code')) {
-        qrStarted = true;
-        captureQR = true;
-        qrLines = [];
+    // 使用 osascript 打开新的终端窗口并运行 wacli auth
+    const script = `
+      tell application "Terminal"
+        activate
+        set newTab to do script "clear && echo '═══════════════════════════════════════' && echo '   WhatsApp 扫码连接' && echo '═══════════════════════════════════════' && echo '' && echo '请用手机 WhatsApp 扫描下方二维码：' && echo '' && wacli auth && echo '' && echo '扫码完成后可关闭此窗口'"
+        set custom title of newTab to "WhatsApp 扫码"
+      end tell
+    `;
+    
+    exec(`osascript -e '${script}'`, (error) => {
+      if (error) {
+        console.error('Failed to open terminal:', error);
+        authStatus = 'failed';
       }
+    });
 
-      // 捕获二维码行
-      if (captureQR) {
-        const lines = text.split('\n');
-        for (const line of lines) {
-          // 检测二维码结束（空行或分隔线）
-          if (line.trim() === '' || line.match(/^[▀=]+$/)) {
-            if (qrLines.length > 10) {
-              captureQR = false;
-              qrCodeText = qrLines.join('\n');
-            }
-          } else if (line.includes('█') || line.includes('▄') || line.includes('▀')) {
-            qrLines.push(line);
-          }
+    // 启动后台进程监听认证状态
+    setTimeout(() => {
+      authProcess = spawn('wacli', ['doctor'], {
+        env: { ...process.env }
+      });
+
+      let output = '';
+      authProcess.stdout.on('data', (data: Buffer) => {
+        output += data.toString();
+      });
+
+      authProcess.on('close', () => {
+        if (output.includes('authenticated') || output.includes('✓') || output.includes('OK')) {
+          authStatus = 'success';
         }
-      }
-
-      // 检测认证成功
-      if (text.includes('Authenticated') || text.includes('successfully')) {
-        authStatus = 'success';
-        qrCodeText = null;
-        if (authProcess) {
-          authProcess.kill();
-          authProcess = null;
-        }
-      }
-
-      // 检测超时
-      if (text.includes('timed out')) {
-        authStatus = 'timeout';
-        if (authProcess) {
-          authProcess.kill();
-          authProcess = null;
-        }
-      }
-    }
-
-    authProcess.on('close', (code: number) => {
-      if (code !== 0 && authStatus !== 'success') {
-        authStatus = code === 1 && fullOutput.includes('timed out') ? 'timeout' : 'failed';
-      }
-      authProcess = null;
-    });
-
-    // 等待二维码生成
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+        authProcess = null;
+      });
+    }, 5000);
 
     res.json({
-      status: authStatus,
-      qrCode: qrCodeText,
-      message: qrCodeText ? '请用手机扫描二维码' : '正在生成二维码...'
+      status: 'opened',
+      message: '已打开终端窗口，请在终端中扫描二维码'
     });
-
   } catch (error: any) {
     console.error('WhatsApp auth error:', error);
     authStatus = 'failed';
@@ -110,17 +65,32 @@ router.post('/auth/start', async (req, res) => {
   }
 });
 
-// 获取二维码状态（轮询用）
-router.get('/auth/status', (req, res) => {
-  res.json({
-    status: authStatus,
-    qrCode: qrCodeText,
-    message: authStatus === 'waiting' ? (qrCodeText ? '请扫描二维码' : '正在生成...') :
-             authStatus === 'success' ? '认证成功！' :
-             authStatus === 'timeout' ? '二维码已超时，请重新生成' :
-             authStatus === 'failed' ? '认证失败，请重试' :
-             '未开始'
-  });
+// 获取认证状态
+router.get('/auth/status', async (req, res) => {
+  try {
+    // 实时检查 wacli 状态
+    const { stdout } = await execAsync('wacli doctor 2>&1');
+    const isAuthenticated = stdout.includes('authenticated') || stdout.includes('✓') || stdout.includes('OK');
+    
+    if (isAuthenticated) {
+      authStatus = 'success';
+    }
+
+    res.json({
+      status: authStatus,
+      authenticated: isAuthenticated,
+      message: authStatus === 'waiting' ? '等待扫码...' :
+               authStatus === 'success' ? '认证成功！' :
+               authStatus === 'failed' ? '认证失败' :
+               '未开始'
+    });
+  } catch (error) {
+    res.json({
+      status: authStatus,
+      authenticated: false,
+      message: '检查状态失败'
+    });
+  }
 });
 
 // 取消认证
@@ -130,7 +100,6 @@ router.post('/auth/cancel', (req, res) => {
     authProcess = null;
   }
   authStatus = 'idle';
-  qrCodeText = null;
   res.json({ status: 'cancelled' });
 });
 
