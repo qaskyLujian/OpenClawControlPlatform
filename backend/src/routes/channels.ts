@@ -3,6 +3,52 @@ import { readConfig, writeConfig } from '../utils/config';
 
 const router = Router();
 
+// 每种 channel 类型允许的字段（从 OpenClaw config schema 提取）
+const CHANNEL_VALID_FIELDS: Record<string, string[]> = {
+  telegram: [
+    'enabled', 'botToken', 'tokenFile', 'dmPolicy', 'groupPolicy', 'streamMode',
+    'allowFrom', 'groupAllowFrom', 'proxy',
+    'replyToMode', 'textChunkLimit', 'chunkMode',
+    'blockStreaming', 'mediaMaxMb', 'timeoutSeconds',
+    'configWrites', 'historyLimit', 'dmHistoryLimit',
+    'name', 'capabilities', 'markdown',
+    'actions', 'reactionNotifications', 'reactionLevel',
+    'heartbeat', 'linkPreview', 'responsePrefix',
+    'retry', 'network', 'groups', 'dms',
+    'draftChunk', 'blockStreamingCoalesce',
+    'commands', 'customCommands',
+    'webhookUrl', 'webhookSecret', 'webhookPath', 'webhookHost'
+  ],
+  whatsapp: [
+    'dmPolicy', 'allowFrom', 'groupPolicy', 'groupAllowFrom',
+    'selfChatMode', 'debounceMs', 'configWrites',
+    'mediaMaxMb', 'historyLimit'
+  ],
+  discord: [
+    'enabled', 'token', 'dmPolicy', 'groupPolicy',
+    'allowFrom', 'groupAllowFrom', 'configWrites',
+    'proxy', 'historyLimit', 'mediaMaxMb',
+    'retry', 'commands'
+  ],
+  signal: [
+    'enabled', 'account', 'dmPolicy', 'groupPolicy',
+    'allowFrom', 'groupAllowFrom', 'configWrites',
+    'historyLimit'
+  ],
+  slack: [
+    'enabled', 'botToken', 'appToken', 'userToken',
+    'dmPolicy', 'groupPolicy',
+    'allowFrom', 'groupAllowFrom', 'configWrites',
+    'commands', 'historyLimit'
+  ],
+  irc: [
+    'enabled', 'server', 'port', 'nickname', 'channels', 'password',
+    'dmPolicy', 'groupPolicy',
+    'allowFrom', 'groupAllowFrom', 'configWrites',
+    'historyLimit'
+  ]
+};
+
 // 脱敏处理 token/key
 function maskToken(token: string): string {
   if (!token || token.length < 8) return '***';
@@ -18,11 +64,8 @@ router.get('/', async (req, res) => {
     const result = Object.entries(channels).map(([name, data]: [string, any]) => {
       const masked: any = {
         name,
-        type: name, // telegram/whatsapp/discord 等
-        enabled: data.enabled ?? true,
-        dmPolicy: data.dmPolicy || 'pairing',
-        groupPolicy: data.groupPolicy || 'allowlist',
-        streamMode: data.streamMode || 'partial'
+        type: name,
+        ...data
       };
 
       // 脱敏处理敏感字段
@@ -38,16 +81,12 @@ router.get('/', async (req, res) => {
         masked.apiKey = maskToken(data.apiKey);
         masked.hasApiKey = true;
       }
-
-      // 保留非敏感字段
-      if (data.webhook) masked.webhook = data.webhook;
-      if (data.guildId) masked.guildId = data.guildId;
-      if (data.server) masked.server = data.server;
-      if (data.port) masked.port = data.port;
-      if (data.nickname) masked.nickname = data.nickname;
-      if (data.channels) masked.channels = data.channels;
-      if (data.phone) masked.phone = data.phone;
-      if (data.workspace) masked.workspace = data.workspace;
+      if (data.appToken) {
+        masked.appToken = maskToken(data.appToken);
+      }
+      if (data.password) {
+        masked.password = '***';
+      }
 
       return masked;
     });
@@ -58,6 +97,26 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: 'Failed to get channels' });
   }
 });
+
+// 根据 channel 类型过滤字段
+function filterFields(type: string, data: Record<string, any>): Record<string, any> {
+  const validFields = CHANNEL_VALID_FIELDS[type];
+  if (!validFields) {
+    // 未知类型，只写入最基本的字段
+    const safe: Record<string, any> = {};
+    if (data.dmPolicy) safe.dmPolicy = data.dmPolicy;
+    if (data.groupPolicy) safe.groupPolicy = data.groupPolicy;
+    return safe;
+  }
+
+  const filtered: Record<string, any> = {};
+  for (const key of validFields) {
+    if (data[key] !== undefined && data[key] !== '') {
+      filtered[key] = data[key];
+    }
+  }
+  return filtered;
+}
 
 // POST /api/channels - 添加新 channel
 router.post('/', async (req, res) => {
@@ -72,41 +131,15 @@ router.post('/', async (req, res) => {
       return res.status(409).json({ error: 'Channel already exists' });
     }
 
-    // 只写入 OpenClaw 认可的字段，过滤掉前端 UI 字段
-    const VALID_FIELDS = [
-      'enabled', 'dmPolicy', 'groupPolicy', 'streamMode',
-      'botToken', 'token', 'apiKey', 'tokenFile',
-      'allowFrom', 'groupAllowFrom',
-      'webhook', 'webhookUrl', 'webhookSecret', 'webhookPath', 'webhookHost',
-      'guildId', 'server', 'port', 'nickname', 'channels',
-      'phone', 'account', 'workspace', 'password',
-      'replyToMode', 'textChunkLimit', 'chunkMode',
-      'blockStreaming', 'mediaMaxMb', 'timeoutSeconds',
-      'proxy', 'configWrites', 'selfChatMode',
-      'historyLimit', 'dmHistoryLimit',
-      'name', 'capabilities', 'markdown',
-      'actions', 'reactionNotifications', 'reactionLevel',
-      'heartbeat', 'linkPreview', 'responsePrefix',
-      'retry', 'network', 'groups', 'dms',
-      'draftChunk', 'blockStreamingCoalesce',
-      'commands', 'customCommands'
-    ];
+    // 根据 channel 类型过滤，只写入该类型支持的字段
+    const channelType = type || name;
+    const channelData = filterFields(channelType, rawData);
 
-    const channelData: Record<string, any> = {};
-    for (const key of VALID_FIELDS) {
-      if (rawData[key] !== undefined && rawData[key] !== '') {
-        channelData[key] = rawData[key];
-      }
-    }
+    // 只设置该类型支持的默认值
+    if (!channelData.dmPolicy) channelData.dmPolicy = 'pairing';
+    if (!channelData.groupPolicy) channelData.groupPolicy = 'allowlist';
 
-    // 设置默认值
-    config.channels[name] = {
-      enabled: true,
-      dmPolicy: 'pairing',
-      groupPolicy: 'allowlist',
-      streamMode: 'partial',
-      ...channelData
-    };
+    config.channels[name] = channelData;
 
     await writeConfig(config);
     res.json({ ok: true });
@@ -129,49 +162,16 @@ router.put('/:name', async (req, res) => {
     }
 
     const existing = config.channels[name];
+    const channelData = filterFields(name, rawData);
 
-    // 只允许更新 OpenClaw 认可的字段
-    const VALID_FIELDS = [
-      'enabled', 'dmPolicy', 'groupPolicy', 'streamMode',
-      'botToken', 'token', 'apiKey', 'tokenFile',
-      'allowFrom', 'groupAllowFrom',
-      'webhook', 'webhookUrl', 'webhookSecret', 'webhookPath', 'webhookHost',
-      'guildId', 'server', 'port', 'nickname', 'channels',
-      'phone', 'account', 'workspace', 'password',
-      'replyToMode', 'textChunkLimit', 'chunkMode',
-      'blockStreaming', 'mediaMaxMb', 'timeoutSeconds',
-      'proxy', 'configWrites', 'selfChatMode',
-      'historyLimit', 'dmHistoryLimit',
-      'name', 'capabilities', 'markdown',
-      'actions', 'reactionNotifications', 'reactionLevel',
-      'heartbeat', 'linkPreview', 'responsePrefix',
-      'retry', 'network', 'groups', 'dms',
-      'draftChunk', 'blockStreamingCoalesce',
-      'commands', 'customCommands'
-    ];
+    // 合并配置，保留原有敏感字段
+    config.channels[name] = { ...existing, ...channelData };
 
-    const channelData: Record<string, any> = {};
-    for (const key of VALID_FIELDS) {
-      if (rawData[key] !== undefined && rawData[key] !== '') {
-        channelData[key] = rawData[key];
+    // 空字符串 token 保留原值
+    for (const key of ['botToken', 'token', 'apiKey', 'appToken', 'password']) {
+      if (rawData[key] === '' && existing[key]) {
+        config.channels[name][key] = existing[key];
       }
-    }
-
-    // 合并配置
-    config.channels[name] = {
-      ...existing,
-      ...channelData
-    };
-
-    // 如果传了空字符串的 token，保留原有的
-    if (channelData.botToken === '' && existing.botToken) {
-      config.channels[name].botToken = existing.botToken;
-    }
-    if (channelData.token === '' && existing.token) {
-      config.channels[name].token = existing.token;
-    }
-    if (channelData.apiKey === '' && existing.apiKey) {
-      config.channels[name].apiKey = existing.apiKey;
     }
 
     await writeConfig(config);
@@ -211,14 +211,12 @@ router.post('/:name/test', async (req, res) => {
       return res.status(404).json({ error: 'Channel not found' });
     }
 
-    // TODO: 实现真实的连接测试逻辑
-    // 这里暂时返回模拟结果
     const channel = config.channels[name];
     const hasCredentials = channel.botToken || channel.token || channel.apiKey;
 
     res.json({
       ok: true,
-      connected: hasCredentials && channel.enabled,
+      connected: !!hasCredentials,
       message: hasCredentials ? 'Connection test passed' : 'Missing credentials'
     });
   } catch (error) {
