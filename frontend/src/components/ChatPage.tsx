@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { PaperClipOutlined, SendOutlined, DeleteOutlined, FileOutlined, DownloadOutlined, PictureOutlined } from '@ant-design/icons';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:7749';
+const API_BASE = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:7749`;
 
 interface ChatFile {
   name: string;
@@ -57,11 +57,16 @@ export default function ChatPage() {
       currentFiles.forEach(f => formData.append('files', f));
 
       const token = localStorage.getItem('auth_token') || 'wj12345';
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2分钟超时
+      
       const resp = await fetch(`${API_BASE}/api/chat`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
-        body: formData
+        body: formData,
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
 
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error || '请求失败');
@@ -75,10 +80,15 @@ export default function ChatPage() {
       };
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error: any) {
+      const errMsg = error.name === 'AbortError' 
+        ? '请求超时，AI 处理时间较长，请稍后重试'
+        : error.message === 'Failed to fetch'
+          ? '网络连接失败，请检查后端服务是否运行'
+          : (error.message || '发送失败');
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `❌ ${error.message || '发送失败，请检查连接'}`,
+        content: `❌ ${errMsg}`,
         timestamp: Date.now()
       }]);
     } finally {

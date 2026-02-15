@@ -30,7 +30,8 @@ app.use(cors({
   origin: '*', // 允许所有来源
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Simple auth middleware
 const AUTH_TOKEN = process.env.ADMIN_TOKEN || 'wj12345';
