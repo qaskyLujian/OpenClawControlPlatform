@@ -56,7 +56,7 @@ export default function Sidebar({ currentPage, onPageChange }: SidebarProps) {
               color: 'var(--text-primary)',
               letterSpacing: '0.5px'
             }}>
-              剑控系统
+              OpenClaw 剑控系统
             </div>
           </div>
         </div>
