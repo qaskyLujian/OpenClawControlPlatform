@@ -1,3 +1,4 @@
+import { readConfig, writeConfig } from '../utils/config';
 import { Router } from 'express';
 import fs from 'fs-extra';
 import os from 'os';
@@ -12,7 +13,7 @@ router.get('/', async (req, res) => {
       return res.json({ providers: [] });
     }
 
-    const config = await fs.readJSON(configPath);
+    const config = await readConfig();
     const providerEntries = Object.entries(config.models?.providers || {});
 
     // 统计每个 provider 的 token 使用量

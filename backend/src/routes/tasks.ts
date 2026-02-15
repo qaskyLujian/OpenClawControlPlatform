@@ -1,3 +1,4 @@
+import { readConfig, writeConfig } from '../utils/config';
 import { Router } from 'express';
 import fs from 'fs-extra';
 import os from 'os';
@@ -10,7 +11,7 @@ const CRON_DIR = path.join(os.homedir(), '.openclaw');
 async function getCronConfig() {
   const configPath = path.join(CRON_DIR, 'openclaw.json');
   if (!await fs.pathExists(configPath)) return { jobs: [] };
-  const config = await fs.readJSON(configPath);
+  const config = await readConfig();
   return { jobs: config.cron?.jobs || [] };
 }
 
@@ -79,7 +80,7 @@ router.post('/cron', async (req, res) => {
     }
 
     const configPath = path.join(CRON_DIR, 'openclaw.json');
-    const config = await fs.readJSON(configPath);
+    const config = await readConfig();
     if (!config.cron) config.cron = {};
     if (!config.cron.jobs) config.cron.jobs = [];
 
@@ -93,7 +94,7 @@ router.post('/cron', async (req, res) => {
     };
 
     config.cron.jobs.push(newJob);
-    await fs.writeJSON(configPath, config, { spaces: 2 });
+    await writeConfig(config);
     res.json({ ok: true, job: newJob });
   } catch (error) {
     console.error('Failed to create cron job:', error);
@@ -108,7 +109,7 @@ router.put('/cron/:id', async (req, res) => {
     const updates = req.body;
 
     const configPath = path.join(CRON_DIR, 'openclaw.json');
-    const config = await fs.readJSON(configPath);
+    const config = await readConfig();
     const jobs = config.cron?.jobs || [];
     const index = jobs.findIndex((j: any) => j.id === id);
 
@@ -116,7 +117,7 @@ router.put('/cron/:id', async (req, res) => {
 
     jobs[index] = { ...jobs[index], ...updates };
     config.cron.jobs = jobs;
-    await fs.writeJSON(configPath, config, { spaces: 2 });
+    await writeConfig(config);
     res.json({ ok: true });
   } catch (error) {
     console.error('Failed to update cron job:', error);
@@ -129,11 +130,11 @@ router.delete('/cron/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const configPath = path.join(CRON_DIR, 'openclaw.json');
-    const config = await fs.readJSON(configPath);
+    const config = await readConfig();
 
     const jobs = config.cron?.jobs || [];
     config.cron.jobs = jobs.filter((j: any) => j.id !== id);
-    await fs.writeJSON(configPath, config, { spaces: 2 });
+    await writeConfig(config);
     res.json({ ok: true });
   } catch (error) {
     console.error('Failed to delete cron job:', error);

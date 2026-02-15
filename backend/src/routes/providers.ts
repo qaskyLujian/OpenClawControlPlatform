@@ -1,3 +1,4 @@
+import { readConfig, writeConfig } from '../utils/config';
 import { Router } from 'express';
 import fs from 'fs-extra';
 import os from 'os';
@@ -8,7 +9,7 @@ const CONFIG_PATH = `${os.homedir()}/.openclaw/openclaw.json`;
 // GET /api/providers - 获取所有 providers
 router.get('/', async (req, res) => {
   try {
-    const config = await fs.readJSON(CONFIG_PATH);
+    const config = await readConfig();
     const providers = config.models?.providers || {};
     const defaultModel = config.agents?.defaults?.model || {};
 
@@ -39,7 +40,7 @@ router.put('/default-model', async (req, res) => {
   try {
     const { primary, fallbacks } = req.body;
     console.log('[PUT /default-model] Request body:', req.body);
-    const config = await fs.readJSON(CONFIG_PATH);
+    const config = await readConfig();
     console.log('[PUT /default-model] Current config.agents.defaults.model:', config.agents?.defaults?.model);
 
     if (!config.agents) config.agents = {};
@@ -50,7 +51,7 @@ router.put('/default-model', async (req, res) => {
     if (fallbacks !== undefined) config.agents.defaults.model.fallbacks = fallbacks;
 
     console.log('[PUT /default-model] New config.agents.defaults.model:', config.agents.defaults.model);
-    await fs.writeJSON(CONFIG_PATH, config, { spaces: 2 });
+    await writeConfig(config);
     console.log('[PUT /default-model] Config written to', CONFIG_PATH);
     res.json({ ok: true });
   } catch (error) {
@@ -64,7 +65,7 @@ router.put('/:name', async (req, res) => {
   try {
     const { name } = req.params;
     const { api, baseUrl, apiKey, models } = req.body;
-    const config = await fs.readJSON(CONFIG_PATH);
+    const config = await readConfig();
 
     if (!config.models) config.models = {};
     if (!config.models.providers) config.models.providers = {};
@@ -84,7 +85,7 @@ router.put('/:name', async (req, res) => {
       config.models.providers[name].apiKey = existing.apiKey;
     }
 
-    await fs.writeJSON(CONFIG_PATH, config, { spaces: 2 });
+    await writeConfig(config);
     res.json({ ok: true });
   } catch (error) {
     console.error('Failed to update provider:', error);
@@ -98,7 +99,7 @@ router.post('/', async (req, res) => {
     const { name, api, baseUrl, apiKey, models } = req.body;
     if (!name) return res.status(400).json({ error: 'name is required' });
 
-    const config = await fs.readJSON(CONFIG_PATH);
+    const config = await readConfig();
     if (!config.models) config.models = {};
     if (!config.models.providers) config.models.providers = {};
 
@@ -113,7 +114,7 @@ router.post('/', async (req, res) => {
       models: models || []
     };
 
-    await fs.writeJSON(CONFIG_PATH, config, { spaces: 2 });
+    await writeConfig(config);
     res.json({ ok: true });
   } catch (error) {
     console.error('Failed to create provider:', error);
@@ -125,14 +126,14 @@ router.post('/', async (req, res) => {
 router.delete('/:name', async (req, res) => {
   try {
     const { name } = req.params;
-    const config = await fs.readJSON(CONFIG_PATH);
+    const config = await readConfig();
 
     if (!config.models?.providers?.[name]) {
       return res.status(404).json({ error: 'Provider not found' });
     }
 
     delete config.models.providers[name];
-    await fs.writeJSON(CONFIG_PATH, config, { spaces: 2 });
+    await writeConfig(config);
     res.json({ ok: true });
   } catch (error) {
     console.error('Failed to delete provider:', error);

@@ -1,9 +1,7 @@
 import { Router } from 'express';
-import fs from 'fs-extra';
-import os from 'os';
+import { readConfig, writeConfig } from '../utils/config';
 
 const router = Router();
-const CONFIG_PATH = `${os.homedir()}/.openclaw/openclaw.json`;
 
 // 脱敏处理 token/key
 function maskToken(token: string): string {
@@ -14,7 +12,7 @@ function maskToken(token: string): string {
 // GET /api/channels - 获取所有 channels
 router.get('/', async (req, res) => {
   try {
-    const config = await fs.readJSON(CONFIG_PATH);
+    const config = await readConfig();
     const channels = config.channels || {};
 
     const result = Object.entries(channels).map(([name, data]: [string, any]) => {
@@ -67,7 +65,7 @@ router.post('/', async (req, res) => {
     const { name, type, ...rawData } = req.body;
     if (!name) return res.status(400).json({ error: 'name is required' });
 
-    const config = await fs.readJSON(CONFIG_PATH);
+    const config = await readConfig();
     if (!config.channels) config.channels = {};
 
     if (config.channels[name]) {
@@ -110,7 +108,7 @@ router.post('/', async (req, res) => {
       ...channelData
     };
 
-    await fs.writeJSON(CONFIG_PATH, config, { spaces: 2 });
+    await writeConfig(config);
     res.json({ ok: true });
   } catch (error) {
     console.error('Failed to create channel:', error);
@@ -123,7 +121,7 @@ router.put('/:name', async (req, res) => {
   try {
     const { name } = req.params;
     const rawData = req.body;
-    const config = await fs.readJSON(CONFIG_PATH);
+    const config = await readConfig();
 
     if (!config.channels) config.channels = {};
     if (!config.channels[name]) {
@@ -176,7 +174,7 @@ router.put('/:name', async (req, res) => {
       config.channels[name].apiKey = existing.apiKey;
     }
 
-    await fs.writeJSON(CONFIG_PATH, config, { spaces: 2 });
+    await writeConfig(config);
     res.json({ ok: true });
   } catch (error) {
     console.error('Failed to update channel:', error);
@@ -188,14 +186,14 @@ router.put('/:name', async (req, res) => {
 router.delete('/:name', async (req, res) => {
   try {
     const { name } = req.params;
-    const config = await fs.readJSON(CONFIG_PATH);
+    const config = await readConfig();
 
     if (!config.channels?.[name]) {
       return res.status(404).json({ error: 'Channel not found' });
     }
 
     delete config.channels[name];
-    await fs.writeJSON(CONFIG_PATH, config, { spaces: 2 });
+    await writeConfig(config);
     res.json({ ok: true });
   } catch (error) {
     console.error('Failed to delete channel:', error);
@@ -207,7 +205,7 @@ router.delete('/:name', async (req, res) => {
 router.post('/:name/test', async (req, res) => {
   try {
     const { name } = req.params;
-    const config = await fs.readJSON(CONFIG_PATH);
+    const config = await readConfig();
 
     if (!config.channels?.[name]) {
       return res.status(404).json({ error: 'Channel not found' });
