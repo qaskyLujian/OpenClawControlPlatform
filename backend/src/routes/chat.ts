@@ -1,11 +1,8 @@
 import { Router } from 'express';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 
 const router = Router();
-const execAsync = promisify(exec);
 
-// POST /api/chat - 发送消息给 OpenClaw
+// POST /api/chat - 对话中心（临时实现）
 router.post('/', async (req, res) => {
   try {
     const { message } = req.body;
@@ -13,32 +10,15 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    // 使用 openclaw CLI 发送消息到主会话
-    const openclawPath = `${process.env.HOME}/.nvm/versions/node/v24.0.2/bin/openclaw`;
-    const escapedMessage = message.replace(/'/g, "'\\''");
-    
-    // 使用 sessions send 发送到主会话
-    const { stdout, stderr } = await execAsync(
-      `${openclawPath} sessions send --session main --message '${escapedMessage}' --timeout 30`,
-      { timeout: 35000 }
-    );
-
-    // 解析响应
-    let reply = stdout.trim();
-    if (stderr) {
-      console.error('OpenClaw stderr:', stderr);
-    }
-
-    // 如果没有响应，返回默认消息
-    if (!reply) {
-      reply = '消息已发送，但未收到回复。';
-    }
-
-    res.json({ reply });
+    // 临时实现：返回友好提示
+    // TODO: 实现真正的对话功能（需要 webchat channel 或独立会话）
+    res.json({ 
+      reply: `📝 收到您的消息："${message}"\n\n💡 对话中心功能说明：\n\n当前管理中心的对话功能正在开发中。您可以通过以下方式与 OpenClaw 对话：\n\n1. 📱 Telegram Bot - 已配置并运行中\n2. 💬 WhatsApp - 已配置并运行中  \n3. 💻 命令行 - 使用 openclaw-tui\n\n📊 您可以在"监控中心"查看所有活跃会话和对话历史。\n\n🔧 如需在管理中心直接对话，需要配置 webchat channel。`
+    });
   } catch (error: any) {
     console.error('Chat error:', error);
     res.status(500).json({ 
-      error: 'Failed to send message',
+      error: '处理消息失败',
       details: error.message 
     });
   }
