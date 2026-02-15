@@ -81,6 +81,7 @@ export default function ManagePage() {
   const [showAddCron, setShowAddCron] = useState(false);
   const [newCron, setNewCron] = useState({ name: '', expr: '', message: '', sessionTarget: 'isolated' });
   const [loading, setLoading] = useState(true);
+  const [editingModelIndex, setEditingModelIndex] = useState<number | null>(null);
 
   useEffect(() => {
     loadAll();
@@ -102,7 +103,12 @@ export default function ManagePage() {
 
   const handleEditProvider = (provider: Provider) => {
     setEditingProvider(provider.name);
-    setEditForm({ api: provider.api, baseUrl: provider.baseUrl, apiKey: '' });
+    setEditForm({ 
+      api: provider.api, 
+      baseUrl: provider.baseUrl, 
+      apiKey: '',
+      models: JSON.parse(JSON.stringify(provider.models)) // 深拷贝模型列表
+    });
   };
 
   const handleSaveProvider = async (name: string) => {
@@ -110,8 +116,37 @@ export default function ManagePage() {
       await updateProvider(name, editForm);
       message.success('Provider 已更新');
       setEditingProvider(null);
+      setEditingModelIndex(null);
       loadAll();
     } catch { message.error('更新失败'); }
+  };
+
+  const handleAddModel = () => {
+    const newModel: ProviderModel = {
+      id: '',
+      name: '',
+      contextWindow: 128000,
+      maxTokens: 4096,
+      reasoning: false
+    };
+    setEditForm({
+      ...editForm,
+      models: [...(editForm.models || []), newModel]
+    });
+    setEditingModelIndex((editForm.models || []).length);
+  };
+
+  const handleDeleteModel = (index: number) => {
+    const models = [...(editForm.models || [])];
+    models.splice(index, 1);
+    setEditForm({ ...editForm, models });
+    if (editingModelIndex === index) setEditingModelIndex(null);
+  };
+
+  const handleUpdateModel = (index: number, field: keyof ProviderModel, value: any) => {
+    const models = [...(editForm.models || [])];
+    models[index] = { ...models[index], [field]: value };
+    setEditForm({ ...editForm, models });
   };
 
   const handleDeleteProvider = async (name: string) => {
@@ -574,8 +609,90 @@ export default function ManagePage() {
                           placeholder="留空保持原值"
                           style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: '#fff', fontSize: 11 }} />
                       </div>
+
+                      {/* 模型列表编辑 */}
+                      <div style={{ marginBottom: 8, borderTop: '1px solid var(--border-subtle)', paddingTop: 8 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                          <span style={{ color: '#ccc', fontSize: 11 }}>模型配置</span>
+                          <button onClick={handleAddModel} style={{
+                            background: 'none', border: '1px solid var(--figma-blue)', borderRadius: 'var(--radius-sm)',
+                            color: 'var(--figma-blue)', fontSize: 10, padding: '1px 6px', cursor: 'pointer'
+                          }}>
+                            <PlusOutlined style={{ fontSize: 9 }} /> 添加
+                          </button>
+                        </div>
+                        {(editForm.models || []).map((model, idx) => (
+                          <div key={idx} style={{
+                            marginBottom: 6, padding: 6, background: 'var(--bg-primary)',
+                            border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)'
+                          }}>
+                            {editingModelIndex === idx ? (
+                              <div style={{ fontSize: 11 }}>
+                                <div style={{ marginBottom: 4 }}>
+                                  <div style={{ color: '#999', fontSize: 10, marginBottom: 2 }}>模型 ID *</div>
+                                  <Input size="small" placeholder="gpt-4o" value={model.id}
+                                    onChange={e => handleUpdateModel(idx, 'id', e.target.value)}
+                                    style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border-subtle)', color: '#fff', fontSize: 10 }} />
+                                </div>
+                                <div style={{ marginBottom: 4 }}>
+                                  <div style={{ color: '#999', fontSize: 10, marginBottom: 2 }}>显示名称</div>
+                                  <Input size="small" placeholder="GPT-4o" value={model.name}
+                                    onChange={e => handleUpdateModel(idx, 'name', e.target.value)}
+                                    style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border-subtle)', color: '#fff', fontSize: 10 }} />
+                                </div>
+                                <Row gutter={4}>
+                                  <Col span={12}>
+                                    <div style={{ color: '#999', fontSize: 10, marginBottom: 2 }}>上下文窗口</div>
+                                    <Input size="small" type="number" value={model.contextWindow}
+                                      onChange={e => handleUpdateModel(idx, 'contextWindow', parseInt(e.target.value) || 0)}
+                                      style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border-subtle)', color: '#fff', fontSize: 10 }} />
+                                  </Col>
+                                  <Col span={12}>
+                                    <div style={{ color: '#999', fontSize: 10, marginBottom: 2 }}>最大输出</div>
+                                    <Input size="small" type="number" value={model.maxTokens}
+                                      onChange={e => handleUpdateModel(idx, 'maxTokens', parseInt(e.target.value) || 0)}
+                                      style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border-subtle)', color: '#fff', fontSize: 10 }} />
+                                  </Col>
+                                </Row>
+                                <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                                  <Switch size="small" checked={model.reasoning}
+                                    onChange={checked => handleUpdateModel(idx, 'reasoning', checked)} />
+                                  <span style={{ fontSize: 10, color: '#999' }}>支持推理</span>
+                                </div>
+                                <div style={{ marginTop: 6, display: 'flex', gap: 4 }}>
+                                  <button onClick={() => setEditingModelIndex(null)}
+                                    style={{ flex: 1, background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: '#ccc', padding: '2px 0', cursor: 'pointer', fontSize: 10 }}>
+                                    完成
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ flex: 1 }}>
+                                  <div style={{ fontSize: 11, color: '#fff', marginBottom: 2 }}>{model.name || model.id || '(未命名)'}</div>
+                                  <div style={{ fontSize: 9, color: '#666' }}>
+                                    {model.id} · {model.contextWindow}ctx · {model.maxTokens}out
+                                    {model.reasoning && <span style={{ marginLeft: 4, color: 'var(--figma-blue)' }}>推理</span>}
+                                  </div>
+                                </div>
+                                <div style={{ display: 'flex', gap: 4 }}>
+                                  <button onClick={() => setEditingModelIndex(idx)}
+                                    style={{ background: 'none', border: 'none', color: 'var(--figma-blue)', cursor: 'pointer', padding: 2 }}>
+                                    <EditOutlined style={{ fontSize: 11 }} />
+                                  </button>
+                                  <button onClick={() => handleDeleteModel(idx)}
+                                    style={{ background: 'none', border: 'none', color: 'var(--figma-red)', cursor: 'pointer', padding: 2 }}>
+                                    <DeleteOutlined style={{ fontSize: 11 }} />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
                       <div style={{ display: 'flex', gap: 6 }}>
-                        <button onClick={() => setEditingProvider(null)} style={{ flex: 1, background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: '#ccc', padding: '3px 0', cursor: 'pointer', fontSize: 11 }}>取消</button>
+                        <button onClick={() => { setEditingProvider(null); setEditingModelIndex(null); }} style={{ flex: 1, background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: '#ccc', padding: '3px 0', cursor: 'pointer', fontSize: 11 }}>取消</button>
                         <button onClick={() => handleSaveProvider(provider.name)} style={{ flex: 1, background: 'var(--figma-blue)', border: 'none', borderRadius: 'var(--radius-sm)', color: '#fff', padding: '3px 0', cursor: 'pointer', fontSize: 11 }}>保存</button>
                       </div>
                     </div>
