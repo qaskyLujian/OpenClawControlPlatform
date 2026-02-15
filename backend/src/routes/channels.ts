@@ -65,6 +65,7 @@ router.get('/', async (req, res) => {
       const masked: any = {
         name,
         type: name,
+        enabled: data.enabled !== false,
         ...data
       };
 
