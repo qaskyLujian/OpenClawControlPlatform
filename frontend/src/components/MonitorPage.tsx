@@ -7,6 +7,7 @@ interface DashboardData {
   gateway: { status: string; uptime: string; pid: number | null };
   sessions: { total: number; active: number; subagents: number };
   usage: { tokensToday: number; requestsToday: number };
+  channels: { name: string; enabled: boolean; state: string; detail: string }[];
   system: { cpu: number; memory: number; cpuHistory?: number[]; memoryHistory?: number[] };
 }
 
@@ -253,6 +254,54 @@ export default function MonitorPage() {
           </div>
         </Col>
       </Row>
+
+      {/* Channels Status */}
+      {dashboard.channels && dashboard.channels.length > 0 && (
+        <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+          <Col span={24}>
+            <div className="figma-panel">
+              <div className="figma-panel-header">
+                <div className="figma-panel-title">Channels 连接状态</div>
+              </div>
+              <div className="figma-panel-body">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-3)' }}>
+                  {dashboard.channels.map(ch => (
+                    <div key={ch.name} style={{
+                      padding: 'var(--space-3)',
+                      background: 'var(--bg-tertiary)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-sm)',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}>
+                      {ch.state === 'OK' && (
+                        <div style={{
+                          position: 'absolute', left: 0, top: 0, bottom: 0, width: 3,
+                          background: 'var(--figma-green)'
+                        }} />
+                      )}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, paddingLeft: ch.state === 'OK' ? 8 : 0 }}>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: '#ffffff' }}>{ch.name}</span>
+                        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+                          <span className={`figma-badge figma-badge-${ch.enabled ? 'green' : 'gray'}`}>
+                            {ch.enabled ? 'ON' : 'OFF'}
+                          </span>
+                          <span className={`figma-badge figma-badge-${ch.state === 'OK' ? 'green' : 'red'}`}>
+                            {ch.state}
+                          </span>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 11, color: '#999999', lineHeight: 1.4 }}>
+                        {ch.detail}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Col>
+        </Row>
+      )}
 
       {/* System Resources + Sessions + Subagents */}
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>

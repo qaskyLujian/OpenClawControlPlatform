@@ -12,11 +12,12 @@ const memoryHistory: number[] = [];
 const MAX_HISTORY = 20;
 
 export async function getDashboardData(): Promise<DashboardData & { system: { cpu: number; memory: number; cpuHistory: number[]; memoryHistory: number[] } }> {
-  const [gatewayStatus, sessions, systemInfo, usage] = await Promise.all([
+  const [gatewayStatus, sessions, systemInfo, usage, channels] = await Promise.all([
     getGatewayStatus(),
     getSessionsInfo(),
     getSystemInfo(),
-    getUsageInfo()
+    getUsageInfo(),
+    getChannelsStatus()
   ]);
 
   // 更新历史
@@ -29,6 +30,7 @@ export async function getDashboardData(): Promise<DashboardData & { system: { cp
     gateway: gatewayStatus,
     sessions,
     usage,
+    channels,
     system: {
       ...systemInfo,
       cpuHistory: [...cpuHistory],
@@ -163,5 +165,34 @@ async function getSystemInfo() {
     };
   } catch {
     return { cpu: 0, memory: 0 };
+  }
+}
+
+async function getChannelsStatus() {
+  try {
+    const openclawPath = `${os.homedir()}/.nvm/versions/node/v24.0.2/bin/openclaw`;
+    const { stdout } = await execAsync(`${openclawPath} status 2>&1`);
+    const lines = stdout.split('\n');
+    const channelsIdx = lines.findIndex(l => l.trim().startsWith('Channels'));
+    if (channelsIdx === -1) return [];
+
+    const channels = [];
+    for (let i = channelsIdx + 3; i < lines.length; i++) {
+      const line = lines[i];
+      if (line.includes('└─') || line.trim() === '') break;
+      if (!line.includes('│')) continue;
+      const parts = line.split('│').map(s => s.trim()).filter(Boolean);
+      if (parts.length >= 4 && parts[0] !== 'Channel') {
+        channels.push({
+          name: parts[0],
+          enabled: parts[1] === 'ON',
+          state: parts[2],
+          detail: parts[3]
+        });
+      }
+    }
+    return channels;
+  } catch {
+    return [];
   }
 }
