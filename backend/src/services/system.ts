@@ -142,10 +142,29 @@ async function getUsageInfo() {
 
 async function getSystemInfo() {
   try {
-    // CPU: 用 top 获取
-    const { stdout: topOutput } = await execAsync('top -l 1 -n 0');
-    const idleMatch = topOutput.match(/([\d.]+)%\s*idle/);
-    const cpu = idleMatch ? Math.round(100 - parseFloat(idleMatch[1])) : 0;
+    // CPU: 用 iostat 获取（与活动监视器一致）
+    let cpu = 0;
+    try {
+      const { stdout: iostatOutput } = await execAsync('/usr/sbin/iostat -c 2 -w 1');
+      const lines = iostatOutput.trim().split('\n');
+      // 取最后一行（第二次采样）
+      const lastLine = lines[lines.length - 1];
+      const parts = lastLine.trim().split(/\s+/);
+      // 格式: ... us sy id ...
+      // 找到 cpu 列后的三个数字
+      const cpuIdx = lines[0].indexOf('cpu');
+      if (cpuIdx > -1 && parts.length >= 3) {
+        // 倒数第4、5、6个是 us sy id（从右往左：load3个 + us sy id）
+        const us = parseFloat(parts[parts.length - 6] || '0');
+        const sy = parseFloat(parts[parts.length - 5] || '0');
+        cpu = Math.round(us + sy);
+      }
+    } catch {
+      // fallback to top
+      const { stdout: topOutput } = await execAsync('top -l 1 -n 0');
+      const idleMatch = topOutput.match(/([\d.]+)%\s*idle/);
+      cpu = idleMatch ? Math.round(100 - parseFloat(idleMatch[1])) : 0;
+    }
 
     // Memory: 用 vm_stat + sysctl 获取更准确的数据
     let memory = 0;
@@ -176,6 +195,7 @@ async function getSystemInfo() {
       }
     } catch {
       // fallback to top
+      const { stdout: topOutput } = await execAsync('top -l 1 -n 0');
       const physMatch = topOutput.match(/PhysMem:\s*([\d.]+)([MG])\s*used.*?([\d.]+)([MG])\s*unused/);
       if (physMatch) {
         const usedVal = parseFloat(physMatch[1]) * (physMatch[2] === 'G' ? 1024 : 1);
