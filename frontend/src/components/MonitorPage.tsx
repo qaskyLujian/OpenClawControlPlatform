@@ -201,12 +201,13 @@ export default function MonitorPage() {
 
   return (
     <div className="content-container">
-      {/* System Stats */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+      {/* System Stats - 顶部关键指标卡片 */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
         <Col span={6}>
           <div className="figma-card figma-stat" style={{
-            background: 'linear-gradient(135deg, rgba(27, 196, 125, 0.1) 0%, var(--bg-secondary) 100%)',
-            borderColor: 'rgba(27, 196, 125, 0.3)'
+            background: 'linear-gradient(135deg, rgba(27, 196, 125, 0.15) 0%, rgba(27, 196, 125, 0.05) 100%)',
+            borderColor: 'rgba(27, 196, 125, 0.4)',
+            boxShadow: '0 2px 8px rgba(27, 196, 125, 0.1)'
           }}>
             <div className="figma-stat-label">网关状态</div>
             <div className="figma-stat-value" style={{ color: dashboard.gateway.status === 'running' ? 'var(--figma-green)' : 'var(--figma-red)' }}>
@@ -219,8 +220,9 @@ export default function MonitorPage() {
         </Col>
         <Col span={6}>
           <div className="figma-card figma-stat" style={{
-            background: 'linear-gradient(135deg, rgba(24, 160, 251, 0.1) 0%, var(--bg-secondary) 100%)',
-            borderColor: 'rgba(24, 160, 251, 0.3)'
+            background: 'linear-gradient(135deg, rgba(24, 160, 251, 0.15) 0%, rgba(24, 160, 251, 0.05) 100%)',
+            borderColor: 'rgba(24, 160, 251, 0.4)',
+            boxShadow: '0 2px 8px rgba(24, 160, 251, 0.1)'
           }}>
             <div className="figma-stat-label">会话总数</div>
             <div className="figma-stat-value" style={{ color: 'var(--figma-blue)' }}>{dashboard.sessions.total}</div>
@@ -229,11 +231,12 @@ export default function MonitorPage() {
         </Col>
         <Col span={6}>
           <div className="figma-card figma-stat" style={{
-            background: 'linear-gradient(135deg, rgba(24, 160, 251, 0.1) 0%, var(--bg-secondary) 100%)',
-            borderColor: 'rgba(24, 160, 251, 0.3)'
+            background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.15) 0%, rgba(138, 43, 226, 0.05) 100%)',
+            borderColor: 'rgba(138, 43, 226, 0.4)',
+            boxShadow: '0 2px 8px rgba(138, 43, 226, 0.1)'
           }}>
             <div className="figma-stat-label">今日 TOKEN</div>
-            <div className="figma-stat-value" style={{ color: 'var(--figma-blue)' }}>
+            <div className="figma-stat-value" style={{ color: '#a78bfa' }}>
               {dashboard.usage.tokensToday > 1000000
                 ? (dashboard.usage.tokensToday / 1000000).toFixed(2) + 'M'
                 : dashboard.usage.tokensToday > 1000
@@ -245,8 +248,9 @@ export default function MonitorPage() {
         </Col>
         <Col span={6}>
           <div className="figma-card figma-stat" style={{
-            background: 'linear-gradient(135deg, rgba(255, 199, 0, 0.1) 0%, var(--bg-secondary) 100%)',
-            borderColor: 'rgba(255, 199, 0, 0.3)'
+            background: 'linear-gradient(135deg, rgba(255, 199, 0, 0.15) 0%, rgba(255, 199, 0, 0.05) 100%)',
+            borderColor: 'rgba(255, 199, 0, 0.4)',
+            boxShadow: '0 2px 8px rgba(255, 199, 0, 0.1)'
           }}>
             <div className="figma-stat-label">子代理</div>
             <div className="figma-stat-value" style={{ color: 'var(--figma-yellow)' }}>{dashboard.sessions.subagents}</div>
@@ -255,77 +259,64 @@ export default function MonitorPage() {
         </Col>
       </Row>
 
-      {/* System Resources + Channels Status */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        <Col span={6}>
-          <div className="figma-panel">
+      {/* System Resources - 系统资源监控 */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
+        <Col span={5}>
+          <div className="figma-panel" style={{ height: '100%' }}>
             <div className="figma-panel-header">
-              <div className="figma-panel-title">CPU 使用率</div>
-              <span className={`figma-badge figma-badge-${dashboard.system.cpu >= 80 ? 'red' : dashboard.system.cpu >= 60 ? 'yellow' : 'green'}`}>
-                {dashboard.system.cpu >= 80 ? '高负载' : dashboard.system.cpu >= 60 ? '较高' : '正常'}
+              <div className="figma-panel-title">CPU</div>
+              <span className={`figma-badge figma-badge-${dashboard.system.cpu >= 80 ? 'red' : dashboard.system.cpu >= 60 ? 'yellow' : 'green'}`} style={{ fontSize: 10 }}>
+                {dashboard.system.cpu >= 80 ? '高' : dashboard.system.cpu >= 60 ? '中' : '低'}
               </span>
             </div>
-            <div className="figma-panel-body" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <CircularProgress value={dashboard.system.cpu} size={100} />
-              <div style={{ marginTop: 12, width: '100%' }}>
-                <div style={{ fontSize: 11, color: '#cccccc', marginBottom: 4 }}>趋势</div>
+            <div className="figma-panel-body" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 'var(--space-3)' }}>
+              <CircularProgress value={dashboard.system.cpu} size={90} />
+              <div style={{ marginTop: 10, width: '100%' }}>
                 <MiniChart data={cpuHistory} />
               </div>
             </div>
           </div>
         </Col>
-        <Col span={6}>
-          <div className="figma-panel">
+        <Col span={5}>
+          <div className="figma-panel" style={{ height: '100%' }}>
             <div className="figma-panel-header">
-              <div className="figma-panel-title">内存使用率</div>
-              <span className={`figma-badge figma-badge-${dashboard.system.memory >= 80 ? 'red' : dashboard.system.memory >= 60 ? 'yellow' : 'green'}`}>
-                {dashboard.system.memory >= 80 ? '高占用' : dashboard.system.memory >= 60 ? '较高' : '正常'}
+              <div className="figma-panel-title">内存</div>
+              <span className={`figma-badge figma-badge-${dashboard.system.memory >= 80 ? 'red' : dashboard.system.memory >= 60 ? 'yellow' : 'green'}`} style={{ fontSize: 10 }}>
+                {dashboard.system.memory >= 80 ? '高' : dashboard.system.memory >= 60 ? '中' : '低'}
               </span>
             </div>
-            <div className="figma-panel-body" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <CircularProgress value={dashboard.system.memory} size={100} />
-              <div style={{ marginTop: 12, width: '100%' }}>
-                <div style={{ fontSize: 11, color: '#cccccc', marginBottom: 4 }}>趋势</div>
+            <div className="figma-panel-body" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 'var(--space-3)' }}>
+              <CircularProgress value={dashboard.system.memory} size={90} />
+              <div style={{ marginTop: 10, width: '100%' }}>
                 <MiniChart data={memHistory} />
               </div>
             </div>
           </div>
         </Col>
         {dashboard.channels && dashboard.channels.length > 0 && (
-          <Col span={12}>
+          <Col span={14}>
             <div className="figma-panel" style={{ height: '100%' }}>
               <div className="figma-panel-header">
-                <div className="figma-panel-title">Channels 连接状态</div>
+                <div className="figma-panel-title">Channels 连接</div>
+                <span className="figma-badge figma-badge-blue" style={{ fontSize: 10 }}>{dashboard.channels.length} 个</span>
               </div>
-              <div className="figma-panel-body" style={{ maxHeight: 180, overflowY: 'auto' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--space-3)' }}>
+              <div className="figma-panel-body" style={{ maxHeight: 168, overflowY: 'auto', padding: 'var(--space-3)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 'var(--space-2)' }}>
                   {dashboard.channels.map(ch => (
                     <div key={ch.name} style={{
-                      padding: 'var(--space-3)',
-                      background: 'var(--bg-tertiary)',
-                      border: '1px solid var(--border-subtle)',
+                      padding: 'var(--space-2)',
+                      background: ch.state === 'OK' ? 'rgba(27, 196, 125, 0.08)' : 'var(--bg-tertiary)',
+                      border: `1px solid ${ch.state === 'OK' ? 'rgba(27, 196, 125, 0.3)' : 'var(--border-subtle)'}`,
                       borderRadius: 'var(--radius-sm)',
-                      position: 'relative',
-                      overflow: 'hidden'
+                      transition: 'all 0.2s ease'
                     }}>
-                      {ch.state === 'OK' && (
-                        <div style={{
-                          position: 'absolute', left: 0, top: 0, bottom: 0, width: 3,
-                          background: 'var(--figma-green)'
-                        }} />
-                      )}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, paddingLeft: ch.state === 'OK' ? 8 : 0 }}>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: '#ffffff' }}>{ch.name}</span>
-                        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
-                          <span className={`figma-badge figma-badge-${ch.enabled ? 'green' : 'gray'}`}>
-                            {ch.enabled ? 'ON' : 'OFF'}
-                          </span>
-                          <span className={`figma-badge figma-badge-${ch.state === 'OK' ? 'green' : 'red'}`}>
-                            {ch.state}
-                          </span>
-                        </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: '#ffffff' }}>{ch.name}</span>
+                        <span className={`figma-badge figma-badge-${ch.state === 'OK' ? 'green' : 'red'}`} style={{ fontSize: 9 }}>
+                          {ch.state}
+                        </span>
                       </div>
-                      <div style={{ fontSize: 11, color: '#999999', lineHeight: 1.4 }}>
+                      <div style={{ fontSize: 10, color: '#999999', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {ch.detail}
                       </div>
                     </div>
@@ -337,147 +328,132 @@ export default function MonitorPage() {
         )}
       </Row>
 
-      {/* Model Token Usage + Sessions + Subagents */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        {dashboard.usage.modelStats && dashboard.usage.modelStats.length > 0 && (
-          <Col span={8}>
-            <div className="figma-panel">
-              <div className="figma-panel-header">
-                <div className="figma-panel-title">模型 Token 使用统计（今日）</div>
-              </div>
-              <div className="figma-panel-body" style={{ maxHeight: 300, overflowY: 'auto' }}>
-                <div style={{ padding: 'var(--space-3)' }}>
-                  {dashboard.usage.modelStats.map((stat, idx) => {
-                    const maxTokens = Math.max(...dashboard.usage.modelStats!.map(s => s.tokens));
-                    const percentage = (stat.tokens / maxTokens) * 100;
-                    const displayTokens = stat.tokens > 1000000
-                      ? (stat.tokens / 1000000).toFixed(2) + 'M'
-                      : stat.tokens > 1000
-                        ? (stat.tokens / 1000).toFixed(1) + 'K'
-                        : stat.tokens;
-                    
-                    return (
-                      <div key={idx} style={{ marginBottom: 'var(--space-3)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                          <span style={{ fontSize: 12, color: '#ccc', fontFamily: 'monospace' }}>{stat.model}</span>
-                          <span style={{ fontSize: 12, color: 'var(--figma-blue)', fontWeight: 600 }}>{displayTokens}</span>
-                        </div>
-                        <div style={{
-                          height: 8,
-                          background: 'var(--bg-tertiary)',
-                          borderRadius: 4,
-                          overflow: 'hidden',
-                          position: 'relative'
-                        }}>
-                          <div style={{
-                            height: '100%',
-                            width: `${percentage}%`,
-                            background: 'linear-gradient(90deg, var(--figma-blue) 0%, rgba(24, 160, 251, 0.6) 100%)',
-                            transition: 'width 0.3s ease',
-                            borderRadius: 4
-                          }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </Col>
-        )}
-        <Col span={dashboard.usage.modelStats && dashboard.usage.modelStats.length > 0 ? 8 : 12}>
-          <div className="figma-panel">
+      {/* Main Content - 会话、子代理、模型统计 */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
+        <Col span={8}>
+          <div className="figma-panel" style={{ height: '100%' }}>
             <div className="figma-panel-header">
               <div className="figma-panel-title">会话列表</div>
-              <span className="figma-badge figma-badge-blue">{sessions.length} 个</span>
+              <span className="figma-badge figma-badge-blue" style={{ fontSize: 10 }}>{sessions.length}</span>
             </div>
-            <div className="figma-panel-body" style={{ maxHeight: 300, overflowY: 'auto' }}>
+            <div className="figma-panel-body" style={{ maxHeight: 340, overflowY: 'auto', padding: 'var(--space-2)' }}>
               {sessions.length === 0 ? (
-                <div style={{ fontSize: 12, color: '#999', textAlign: 'center', padding: 20 }}>暂无会话</div>
+                <div style={{ fontSize: 12, color: '#999', textAlign: 'center', padding: 30 }}>暂无会话</div>
               ) : sessions.map((session, index) => (
                 <div key={index} style={{
                   padding: 'var(--space-2)',
                   marginBottom: 'var(--space-2)',
-                  background: 'var(--bg-tertiary)',
-                  border: '1px solid var(--border-subtle)',
+                  background: session.active ? 'rgba(27, 196, 125, 0.08)' : 'var(--bg-tertiary)',
+                  border: `1px solid ${session.active ? 'rgba(27, 196, 125, 0.3)' : 'var(--border-subtle)'}`,
                   borderRadius: 'var(--radius-sm)',
-                  position: 'relative',
-                  overflow: 'hidden'
+                  transition: 'all 0.2s ease'
                 }}>
-                  {session.active && (
-                    <div style={{
-                      position: 'absolute', left: 0, top: 0, bottom: 0, width: 3,
-                      background: 'var(--figma-green)', animation: 'pulse 2s ease-in-out infinite'
-                    }} />
-                  )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#ffffff', paddingLeft: session.active ? 8 : 0 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: '#ffffff' }}>
                       {session.key.startsWith('orphan:') ? (session.label || session.sessionId.substring(0, 8)) : session.key.replace('agent:main:', '')}
                     </span>
                     {session.kind && session.kind !== 'main' && (
-                      <span className="figma-badge figma-badge-yellow" style={{ fontSize: 10 }}>{session.kind === 'isolated' ? '子代理' : session.kind}</span>
+                      <span className="figma-badge figma-badge-yellow" style={{ fontSize: 9 }}>{session.kind === 'isolated' ? '子代理' : session.kind}</span>
                     )}
                   </div>
-                  <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 4, flexWrap: 'wrap' }}>
-                    <span className="figma-badge figma-badge-blue">{session.channel || 'unknown'}</span>
-                    <span className={`figma-badge figma-badge-${session.active ? 'green' : 'gray'}`}>
+                  <div style={{ display: 'flex', gap: 'var(--space-1)', marginBottom: 3, flexWrap: 'wrap' }}>
+                    <span className="figma-badge figma-badge-blue" style={{ fontSize: 9 }}>{session.channel || 'unknown'}</span>
+                    <span className={`figma-badge figma-badge-${session.active ? 'green' : 'gray'}`} style={{ fontSize: 9 }}>
                       {session.active ? '活跃' : '空闲'}
                     </span>
                     {session.model && (
-                      <span className="figma-badge figma-badge-purple" style={{ fontSize: 10 }}>{session.model}</span>
+                      <span className="figma-badge figma-badge-purple" style={{ fontSize: 9 }}>{session.model}</span>
                     )}
                   </div>
-                  <div style={{ fontSize: 11, color: '#cccccc', display: 'flex', gap: 'var(--space-3)' }}>
-                    <span>消息: {session.messageCount}</span>
-                    <span>Token: {session.tokenCount > 1000 ? (session.tokenCount / 1000).toFixed(1) + 'K' : session.tokenCount}</span>
+                  <div style={{ fontSize: 10, color: '#999', display: 'flex', gap: 'var(--space-2)' }}>
+                    <span>💬 {session.messageCount}</span>
+                    <span>🔤 {session.tokenCount > 1000 ? (session.tokenCount / 1000).toFixed(1) + 'K' : session.tokenCount}</span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         </Col>
-        <Col span={dashboard.usage.modelStats && dashboard.usage.modelStats.length > 0 ? 8 : 12}>
-          <div className="figma-panel">
+        <Col span={8}>
+          <div className="figma-panel" style={{ height: '100%' }}>
             <div className="figma-panel-header">
               <div className="figma-panel-title">子代理任务</div>
-              <span className="figma-badge figma-badge-yellow">{subagentTasks.length} 个</span>
+              <span className="figma-badge figma-badge-yellow" style={{ fontSize: 10 }}>{subagentTasks.length}</span>
             </div>
-            <div className="figma-panel-body" style={{ maxHeight: 300, overflowY: 'auto' }}>
+            <div className="figma-panel-body" style={{ maxHeight: 340, overflowY: 'auto', padding: 'var(--space-2)' }}>
               {subagentTasks.length === 0 ? (
-                <div style={{ fontSize: 12, color: '#999', textAlign: 'center', padding: 20 }}>暂无子代理</div>
+                <div style={{ fontSize: 12, color: '#999', textAlign: 'center', padding: 30 }}>暂无子代理</div>
               ) : subagentTasks.map((task, index) => (
                 <div key={index} style={{
                   padding: 'var(--space-2)',
                   marginBottom: 'var(--space-2)',
-                  background: 'var(--bg-tertiary)',
-                  border: '1px solid var(--border-subtle)',
+                  background: task.status === 'running' ? 'rgba(255, 199, 0, 0.08)' : 'var(--bg-tertiary)',
+                  border: `1px solid ${task.status === 'running' ? 'rgba(255, 199, 0, 0.3)' : 'var(--border-subtle)'}`,
                   borderRadius: 'var(--radius-sm)',
-                  position: 'relative',
-                  overflow: 'hidden'
+                  transition: 'all 0.2s ease'
                 }}>
-                  {task.status === 'running' && (
-                    <div style={{
-                      position: 'absolute', left: 0, top: 0, bottom: 0, width: 3,
-                      background: 'var(--figma-green)', animation: 'pulse 2s ease-in-out infinite'
-                    }} />
-                  )}
-                  <div style={{ marginBottom: 4, paddingLeft: task.status === 'running' ? 8 : 0 }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#ffffff' }}>{task.label}</span>
+                  <div style={{ marginBottom: 4 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: '#ffffff' }}>{task.label}</span>
                   </div>
-                  <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 4 }}>
-                    <span className={`figma-badge figma-badge-${task.status === 'running' ? 'green' : task.status === 'failed' ? 'red' : 'gray'}`}>
-                      {task.status === 'running' ? '运行中' : task.status === 'failed' ? '失败' : '已完成'}
+                  <div style={{ display: 'flex', gap: 'var(--space-1)', marginBottom: 3 }}>
+                    <span className={`figma-badge figma-badge-${task.status === 'running' ? 'green' : task.status === 'failed' ? 'red' : 'gray'}`} style={{ fontSize: 9 }}>
+                      {task.status === 'running' ? '运行中' : task.status === 'failed' ? '失败' : '完成'}
                     </span>
-                    <span className="figma-badge figma-badge-blue">{task.model}</span>
+                    <span className="figma-badge figma-badge-blue" style={{ fontSize: 9 }}>{task.model}</span>
                   </div>
-                  <div style={{ fontSize: 11, color: '#cccccc' }}>
-                    {task.updatedAt ? new Date(task.updatedAt).toLocaleString('zh-CN', { hour12: false }) : ''}
+                  <div style={{ fontSize: 10, color: '#999' }}>
+                    {task.updatedAt ? new Date(task.updatedAt).toLocaleString('zh-CN', { hour12: false, month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : ''}
                   </div>
                 </div>
               ))}
             </div>
           </div>
         </Col>
+        {dashboard.usage.modelStats && dashboard.usage.modelStats.length > 0 && (
+          <Col span={8}>
+            <div className="figma-panel" style={{ height: '100%' }}>
+              <div className="figma-panel-header">
+                <div className="figma-panel-title">模型 Token 统计</div>
+                <span className="figma-badge figma-badge-purple" style={{ fontSize: 10 }}>今日</span>
+              </div>
+              <div className="figma-panel-body" style={{ maxHeight: 340, overflowY: 'auto', padding: 'var(--space-3)' }}>
+                {dashboard.usage.modelStats.map((stat, idx) => {
+                  const maxTokens = Math.max(...dashboard.usage.modelStats!.map(s => s.tokens));
+                  const percentage = (stat.tokens / maxTokens) * 100;
+                  const displayTokens = stat.tokens > 1000000
+                    ? (stat.tokens / 1000000).toFixed(2) + 'M'
+                    : stat.tokens > 1000
+                      ? (stat.tokens / 1000).toFixed(1) + 'K'
+                      : stat.tokens;
+                  
+                  return (
+                    <div key={idx} style={{ marginBottom: 'var(--space-3)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                        <span style={{ fontSize: 11, color: '#ccc', fontFamily: 'monospace' }}>{stat.model}</span>
+                        <span style={{ fontSize: 11, color: '#a78bfa', fontWeight: 600 }}>{displayTokens}</span>
+                      </div>
+                      <div style={{
+                        height: 6,
+                        background: 'var(--bg-tertiary)',
+                        borderRadius: 3,
+                        overflow: 'hidden',
+                        position: 'relative'
+                      }}>
+                        <div style={{
+                          height: '100%',
+                          width: `${percentage}%`,
+                          background: 'linear-gradient(90deg, #a78bfa 0%, rgba(167, 139, 250, 0.5) 100%)',
+                          transition: 'width 0.3s ease',
+                          borderRadius: 3
+                        }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </Col>
+        )}
       </Row>
 
       {/* Models */}
