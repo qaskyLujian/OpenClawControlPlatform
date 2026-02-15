@@ -1,46 +1,47 @@
-import { readConfig, writeConfig } from '../utils/config';
 import { Router } from 'express';
 import fs from 'fs-extra';
 import os from 'os';
 import path from 'path';
 
 const router = Router();
-const CRON_DIR = path.join(os.homedir(), '.openclaw');
+const CRON_FILE = path.join(os.homedir(), '.openclaw', 'admin-cron-jobs.json');
 
-// 读取 openclaw.json 中的 cron jobs 配置
-async function getCronConfig() {
-  const configPath = path.join(CRON_DIR, 'openclaw.json');
-  if (!await fs.pathExists(configPath)) return { jobs: [] };
-  const config = await readConfig();
-  return { jobs: config.cron?.jobs || [] };
-}
-
-// 读取 cron 运行状态（从 session 日志推断）
-async function getCronState() {
-  const statePath = path.join(CRON_DIR, 'cron-state.json');
-  if (await fs.pathExists(statePath)) {
-    return await fs.readJSON(statePath);
+// 读写独立的 cron 配置文件（不写入 openclaw.json）
+async function readCronJobs(): Promise<any[]> {
+  if (await fs.pathExists(CRON_FILE)) {
+    return await fs.readJSON(CRON_FILE);
   }
-  return {};
+  return [];
 }
 
-// GET /api/tasks - 获取所有定时任务
+async function writeCronJobs(jobs: any[]) {
+  await fs.writeJSON(CRON_FILE, jobs, { spaces: 2 });
+}
+
+// GET /api/tasks
 router.get('/', async (req, res) => {
   try {
-    const { jobs } = await getCronConfig();
-    const state = await getCronState();
+    const cronJobs = (await readCronJobs()).map((job: any, i: number) => ({
+      id: job.id || `cron-${i}`,
+      type: 'cron',
+      name: job.name || '未命名任务',
+      schedule: job.schedule || {},
+      payload: job.payload || {},
+      enabled: job.enabled !== false,
+      sessionTarget: job.sessionTarget || 'isolated',
+      lastRun: job.lastRun || null,
+      lastStatus: job.lastStatus || null
+    }));
 
-    // 也扫描 sessions.json 中的子代理任务
+    // 子代理任务
     const sessionsPath = path.join(os.homedir(), '.openclaw', 'agents', 'main', 'sessions', 'sessions.json');
     const subagentTasks: any[] = [];
-
     if (await fs.pathExists(sessionsPath)) {
       const sessions = await fs.readJSON(sessionsPath);
       for (const [key, meta] of Object.entries(sessions) as [string, any][]) {
         if (key.includes('subagent')) {
           subagentTasks.push({
-            id: key,
-            type: 'subagent',
+            id: key, type: 'subagent',
             label: meta.label || key.split(':').pop()?.substring(0, 8),
             status: meta.abortedLastRun ? 'failed' : (Date.now() - (meta.updatedAt || 0) < 30 * 60 * 1000 ? 'running' : 'completed'),
             model: meta.model || 'unknown',
@@ -51,19 +52,6 @@ router.get('/', async (req, res) => {
       }
     }
 
-    // 格式化 cron jobs
-    const cronJobs = jobs.map((job: any, index: number) => ({
-      id: job.id || `cron-${index}`,
-      type: 'cron',
-      name: job.name || `定时任务 ${index + 1}`,
-      schedule: job.schedule || {},
-      payload: job.payload || {},
-      enabled: job.enabled !== false,
-      sessionTarget: job.sessionTarget || 'isolated',
-      lastRun: state[job.id]?.lastRun || null,
-      lastStatus: state[job.id]?.lastStatus || null
-    }));
-
     res.json({ cronJobs, subagentTasks });
   } catch (error) {
     console.error('Failed to get tasks:', error);
@@ -71,7 +59,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST /api/tasks/cron - 添加定时任务
+// POST /api/tasks/cron
 router.post('/cron', async (req, res) => {
   try {
     const { name, schedule, payload, sessionTarget, enabled } = req.body;
@@ -79,22 +67,16 @@ router.post('/cron', async (req, res) => {
       return res.status(400).json({ error: 'schedule and payload are required' });
     }
 
-    const configPath = path.join(CRON_DIR, 'openclaw.json');
-    const config = await readConfig();
-    if (!config.cron) config.cron = {};
-    if (!config.cron.jobs) config.cron.jobs = [];
-
+    const jobs = await readCronJobs();
     const newJob = {
       id: `job-${Date.now()}`,
       name: name || '新任务',
-      schedule,
-      payload,
+      schedule, payload,
       sessionTarget: sessionTarget || 'isolated',
       enabled: enabled !== false
     };
-
-    config.cron.jobs.push(newJob);
-    await writeConfig(config);
+    jobs.push(newJob);
+    await writeCronJobs(jobs);
     res.json({ ok: true, job: newJob });
   } catch (error) {
     console.error('Failed to create cron job:', error);
@@ -102,22 +84,17 @@ router.post('/cron', async (req, res) => {
   }
 });
 
-// PUT /api/tasks/cron/:id - 更新定时任务
+// PUT /api/tasks/cron/:id
 router.put('/cron/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
-
-    const configPath = path.join(CRON_DIR, 'openclaw.json');
-    const config = await readConfig();
-    const jobs = config.cron?.jobs || [];
+    const jobs = await readCronJobs();
     const index = jobs.findIndex((j: any) => j.id === id);
-
     if (index === -1) return res.status(404).json({ error: 'Job not found' });
 
     jobs[index] = { ...jobs[index], ...updates };
-    config.cron.jobs = jobs;
-    await writeConfig(config);
+    await writeCronJobs(jobs);
     res.json({ ok: true });
   } catch (error) {
     console.error('Failed to update cron job:', error);
@@ -125,16 +102,12 @@ router.put('/cron/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/tasks/cron/:id - 删除定时任务
+// DELETE /api/tasks/cron/:id
 router.delete('/cron/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const configPath = path.join(CRON_DIR, 'openclaw.json');
-    const config = await readConfig();
-
-    const jobs = config.cron?.jobs || [];
-    config.cron.jobs = jobs.filter((j: any) => j.id !== id);
-    await writeConfig(config);
+    const jobs = await readCronJobs();
+    await writeCronJobs(jobs.filter((j: any) => j.id !== id));
     res.json({ ok: true });
   } catch (error) {
     console.error('Failed to delete cron job:', error);
