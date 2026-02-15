@@ -33,14 +33,26 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [lastSync, setLastSync] = useState(0);
+  const [autoScroll, setAutoScroll] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (autoScroll) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
-  useEffect(() => { scrollToBottom(); }, [messages, loading]);
+  // 检测用户是否在底部
+  const handleScroll = () => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    const isAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+    setAutoScroll(isAtBottom);
+  };
+
+  useEffect(() => { scrollToBottom(); }, [messages, loading, autoScroll]);
 
   // 定期同步会话历史（每 5 秒）
   useEffect(() => {
@@ -230,9 +242,13 @@ export default function ChatPage() {
         </div>
       </div>
 
-      <div className="figma-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+      <div className="figma-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, position: 'relative' }}>
         {/* 消息区域 */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+        <div 
+          ref={messagesContainerRef}
+          onScroll={handleScroll}
+          style={{ flex: 1, overflowY: 'auto', padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}
+        >
           {messages.length === 0 ? (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
               <span style={{ fontSize: 48 }}>🦞</span>
@@ -292,6 +308,44 @@ export default function ChatPage() {
           )}
           <div ref={messagesEndRef} />
         </div>
+
+        {/* 回到底部按钮 */}
+        {!autoScroll && (
+          <div style={{ position: 'absolute', bottom: 100, right: 30, zIndex: 10 }}>
+            <button
+              onClick={() => {
+                setAutoScroll(true);
+                scrollToBottom();
+              }}
+              style={{
+                background: 'var(--figma-blue)',
+                border: 'none',
+                borderRadius: '50%',
+                width: 40,
+                height: 40,
+                color: '#fff',
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                fontSize: 18,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.1)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(78, 143, 240, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+              }}
+              title="回到底部"
+            >
+              ↓
+            </button>
+          </div>
+        )}
 
         {/* 待上传文件预览 */}
         {pendingFiles.length > 0 && (
