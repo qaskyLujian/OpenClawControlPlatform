@@ -110,8 +110,8 @@ function App() {
         {/* Page Content */}
         <div style={{
           flex: 1,
-          overflow: 'auto',
-          padding: 'var(--space-4)',
+          overflow: currentPage === 'chat' ? 'hidden' : 'auto',
+          padding: currentPage === 'chat' ? 0 : 'var(--space-4)',
           width: '100%',
           boxSizing: 'border-box'
         }}>

@@ -224,7 +224,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: 'var(--space-4)' }}>
       <div className="figma-panel" style={{ marginBottom: 16 }}>
         <div className="figma-panel-header" style={{
           background: 'linear-gradient(135deg, rgba(78, 143, 240, 0.12) 0%, rgba(78, 143, 240, 0.04) 100%)',
