@@ -38,7 +38,8 @@ app.use((req, res, next) => {
   // Skip auth for health check
   if (req.path === '/health') return next();
   
-  const token = req.headers.authorization?.replace('Bearer ', '');
+  // 支持 query param token（用于文件下载）
+  const token = req.headers.authorization?.replace('Bearer ', '') || req.query.token as string;
   if (token !== AUTH_TOKEN) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
