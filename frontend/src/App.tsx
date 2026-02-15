@@ -5,7 +5,6 @@ import Login from './components/Login';
 import Sidebar from './components/Sidebar';
 import MonitorPage from './components/MonitorPage';
 import ManagePage from './components/ManagePage';
-import ChannelsPage from './components/ChannelsPage';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -35,8 +34,6 @@ function App() {
         return <MonitorPage />;
       case 'manage':
         return <ManagePage />;
-      case 'channels':
-        return <ChannelsPage />;
       default:
         return <MonitorPage />;
     }
@@ -44,8 +41,7 @@ function App() {
 
   const pageTitle = {
     monitor: '监控中心',
-    manage: '管理中心',
-    channels: 'Channel 配置'
+    manage: '管理中心'
   }[currentPage];
 
   if (loading) {

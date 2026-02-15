@@ -1,7 +1,6 @@
 import {
   DashboardOutlined,
   SettingOutlined,
-  ApiOutlined,
 } from '@ant-design/icons';
 
 interface SidebarProps {
@@ -20,11 +19,6 @@ export default function Sidebar({ currentPage, onPageChange }: SidebarProps) {
       key: 'manage',
       icon: <SettingOutlined />,
       label: '管理中心',
-    },
-    {
-      key: 'channels',
-      icon: <ApiOutlined />,
-      label: 'Channel 配置',
     },
   ];
 
