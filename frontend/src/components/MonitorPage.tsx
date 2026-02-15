@@ -509,7 +509,7 @@ export default function MonitorPage() {
       {/* Skills */}
       <div className="figma-panel" style={{ marginBottom: 16 }}>
         <div className="figma-panel-header">
-          <div className="figma-panel-title">技能列表</div>
+          <div className="figma-panel-title">Skills 列表</div>
           <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
             <span className="figma-badge figma-badge-blue">{skills.filter(s => s.source === 'system').length} 系统</span>
             <span className="figma-badge figma-badge-green">{skills.filter(s => s.source === 'custom').length} 自定义</span>
@@ -528,7 +528,7 @@ export default function MonitorPage() {
             <div style={{ marginBottom: 'var(--space-3)' }}>
               <input
                 type="text"
-                placeholder="搜索技能..."
+                placeholder="搜索 Skill..."
                 value={skillSearch}
                 onChange={(e) => setSkillSearch(e.target.value)}
                 style={{
@@ -584,15 +584,19 @@ export default function MonitorPage() {
                 <span style={{ fontSize: 14, fontWeight: 600, color: '#ffffff' }}>{selectedSkill.name}</span>
                 <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
                   <span className={`figma-badge figma-badge-${selectedSkill.source === 'system' ? 'blue' : 'green'}`}>
-                    {selectedSkill.source === 'system' ? '系统' : '自定义'}
+                    {selectedSkill.source === 'system' ? '系统技能' : '自定义技能'}
                   </span>
                   <span className={`figma-badge figma-badge-${selectedSkill.hasSkillMd ? 'green' : 'gray'}`}>
-                    {selectedSkill.hasSkillMd ? 'SKILL.md ✓' : '无文档'}
+                    {selectedSkill.hasSkillMd ? '有文档' : '无文档'}
                   </span>
                 </div>
               </div>
-              <div style={{ fontSize: 12, color: '#cccccc', lineHeight: 1.6 }}>
+              <div style={{ fontSize: 12, color: '#999', marginBottom: 6 }}>
+                <span style={{ color: '#ccc', fontWeight: 500 }}>描述：</span>
                 {selectedSkill.description || '暂无描述'}
+              </div>
+              <div style={{ fontSize: 11, color: '#666', fontFamily: 'monospace' }}>
+                来源：{selectedSkill.source === 'system' ? '系统内置' : '用户自定义'}
               </div>
             </div>
           )}
