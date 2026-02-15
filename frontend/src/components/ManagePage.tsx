@@ -896,9 +896,16 @@ export default function ManagePage() {
                           style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: '#fff', fontSize: 11 }} />
                       </div>
                       <div style={{ marginBottom: 8 }}>
-                        <div style={{ color: '#ccc', marginBottom: 2, fontSize: 11 }}>API Key (留空保持不变)</div>
+                        <div style={{ color: '#ccc', marginBottom: 2, fontSize: 11 }}>
+                          API Key 
+                          {provider.hasApiKey && (
+                            <span style={{ marginLeft: 6, color: '#4e8ff0', fontSize: 10 }}>
+                              (当前: {provider.apiKey})
+                            </span>
+                          )}
+                        </div>
                         <Input.Password size="small" value={editForm.apiKey} onChange={e => setEditForm({ ...editForm, apiKey: e.target.value })}
-                          placeholder="留空保持原值"
+                          placeholder={provider.hasApiKey ? "留空保持原值" : "输入 API Key"}
                           style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: '#fff', fontSize: 11 }} />
                       </div>
 
