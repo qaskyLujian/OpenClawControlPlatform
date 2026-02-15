@@ -349,8 +349,31 @@ export default function MonitorPage() {
                   transition: 'all 0.2s ease'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: '#ffffff' }}>
-                      {session.key.startsWith('orphan:') ? (session.label || session.sessionId.substring(0, 8)) : session.key.replace('agent:main:', '')}
+                    <span style={{ fontSize: 11, fontWeight: 600, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '70%' }}>
+                      {(() => {
+                        // 优先显示 label
+                        if (session.label) return session.label;
+                        
+                        // 孤立会话显示 sessionId 前 8 位
+                        if (session.key.startsWith('orphan:')) {
+                          return `会话 ${session.sessionId.substring(0, 8)}`;
+                        }
+                        
+                        // 主会话根据 channel 显示友好名称
+                        const keyParts = session.key.split(':');
+                        if (keyParts.length >= 3) {
+                          const channel = keyParts[2];
+                          if (channel === 'webchat') return 'Web 控制台';
+                          if (channel === 'telegram') return keyParts[3] ? `Telegram ${keyParts[3]}` : 'Telegram';
+                          if (channel === 'whatsapp') return keyParts[3] ? `WhatsApp ${keyParts[3]}` : 'WhatsApp';
+                          if (channel === 'discord') return 'Discord';
+                          if (channel === 'signal') return 'Signal';
+                          return channel;
+                        }
+                        
+                        // 兜底：显示 sessionId 前 8 位
+                        return `会话 ${session.sessionId.substring(0, 8)}`;
+                      })()}
                     </span>
                     {session.kind && session.kind !== 'main' && (
                       <span className="figma-badge figma-badge-yellow" style={{ fontSize: 9 }}>{session.kind === 'isolated' ? '子代理' : session.kind}</span>
