@@ -444,7 +444,7 @@ export default function ManagePage() {
   };
 
   // 过滤会话
-  const channels = [...new Set(sessions.flatMap(s => s.channels || [s.channel]))];
+  const sessionChannels = [...new Set(sessions.flatMap(s => s.channels || [s.channel]))];
   const filteredSessions = sessions.filter(s => {
     if (channelFilter !== 'all') {
       const sessionChannels = s.channels || [s.channel];
@@ -485,7 +485,7 @@ export default function ManagePage() {
             <select value={channelFilter} onChange={e => setChannelFilter(e.target.value)}
               style={{ padding: '2px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: '#fff', fontSize: 12 }}>
               <option value="all">全部渠道</option>
-              {channels.map(ch => <option key={ch} value={ch}>{ch}</option>)}
+              {sessionChannels.map(ch => <option key={ch} value={ch}>{ch}</option>)}
             </select>
           </div>
 
