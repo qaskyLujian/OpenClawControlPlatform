@@ -85,6 +85,7 @@ router.post('/', upload.array('files', 5), async (req: any, res) => {
     // 转义消息
     const escaped = fullMessage.replace(/'/g, "'\\''");
 
+    // 使用独立会话（避免与主会话冲突导致排队超时）
     const { stdout } = await execAsync(
       `${OPENCLAW} agent --session-id ${ADMIN_SESSION_ID} --message '${escaped}' --json`,
       { timeout: 120000, env: ENV, maxBuffer: 2 * 1024 * 1024 }
