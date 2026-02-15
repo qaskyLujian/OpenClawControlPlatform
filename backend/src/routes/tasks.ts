@@ -9,6 +9,70 @@ const router = Router();
 const execAsync = promisify(exec);
 const OPENCLAW = path.join(os.homedir(), '.nvm/versions/node/v24.0.2/bin/openclaw');
 
+// 渠道 target 映射文件
+const CHANNEL_TARGETS_PATH = path.join(os.homedir(), '.openclaw', 'admin-channel-targets.json');
+
+// 从多个来源解析渠道的 delivery target
+async function resolveChannelTarget(channel: string): Promise<string | null> {
+  // 1. 先查本地映射文件
+  if (await fs.pathExists(CHANNEL_TARGETS_PATH)) {
+    try {
+      const targets = await fs.readJSON(CHANNEL_TARGETS_PATH);
+      if (targets[channel]) return targets[channel];
+    } catch {}
+  }
+
+  // 2. 从 sessions.json 查找
+  const sessionsPath = path.join(os.homedir(), '.openclaw', 'agents', 'main', 'sessions', 'sessions.json');
+  if (await fs.pathExists(sessionsPath)) {
+    try {
+      const sessions = await fs.readJSON(sessionsPath);
+      for (const [, meta] of Object.entries(sessions) as [string, any][]) {
+        const lastTo = meta?.lastTo || meta?.route?.to || '';
+        if (lastTo.startsWith(`${channel}:`)) {
+          const target = lastTo.replace(`${channel}:`, '');
+          await saveChannelTarget(channel, target);
+          return target;
+        }
+      }
+    } catch {}
+  }
+
+  // 3. 从 gateway 日志中提取
+  const logPath = path.join(os.homedir(), '.openclaw', 'logs', 'gateway.log');
+  if (await fs.pathExists(logPath)) {
+    try {
+      const log = await fs.readFile(logPath, 'utf-8');
+      const lines = log.split('\n').reverse(); // 从最新的开始
+      for (const line of lines) {
+        if (channel === 'telegram') {
+          // [telegram] Inbound message 7232518861
+          const m = line.match(/\[telegram\].*?(\d{5,})/);
+          if (m) { await saveChannelTarget(channel, m[1]); return m[1]; }
+        }
+        if (channel === 'whatsapp') {
+          // [whatsapp] Sending message -> 7232518861@s.whatsapp.net
+          const m = line.match(/\[whatsapp\].*?(\d{5,})@s\.whatsapp\.net/);
+          if (m) { await saveChannelTarget(channel, m[1]); return m[1]; }
+        }
+      }
+    } catch {}
+  }
+
+  return null;
+}
+
+async function saveChannelTarget(channel: string, target: string) {
+  try {
+    let targets: Record<string, string> = {};
+    if (await fs.pathExists(CHANNEL_TARGETS_PATH)) {
+      targets = await fs.readJSON(CHANNEL_TARGETS_PATH);
+    }
+    targets[channel] = target;
+    await fs.writeJSON(CHANNEL_TARGETS_PATH, targets, { spaces: 2 });
+  } catch {}
+}
+
 // 执行 openclaw cron 命令
 async function cronExec(args: string): Promise<string> {
   const { stdout } = await execAsync(`${OPENCLAW} cron ${args}`, {
@@ -118,24 +182,9 @@ router.post('/cron', async (req, res) => {
       if (deliveryChannel && deliveryChannel !== 'auto') {
         args.push('--channel', deliveryChannel);
         // 自动查找渠道的 delivery target
-        if (deliveryTo) {
-          args.push('--to', JSON.stringify(deliveryTo));
-        } else {
-          // 从 sessions.json 中查找最近的 target
-          const sessionsPath = path.join(os.homedir(), '.openclaw', 'agents', 'main', 'sessions', 'sessions.json');
-          if (await fs.pathExists(sessionsPath)) {
-            try {
-              const sessions = await fs.readJSON(sessionsPath);
-              for (const [, meta] of Object.entries(sessions) as [string, any][]) {
-                const lastTo = meta?.lastTo || meta?.route?.to || '';
-                if (lastTo.startsWith(`${deliveryChannel}:`)) {
-                  const toTarget = lastTo.replace(`${deliveryChannel}:`, '');
-                  args.push('--to', JSON.stringify(toTarget));
-                  break;
-                }
-              }
-            } catch {}
-          }
+        const resolvedTo = deliveryTo || await resolveChannelTarget(deliveryChannel);
+        if (resolvedTo) {
+          args.push('--to', JSON.stringify(resolvedTo));
         }
       }
     }
