@@ -115,7 +115,7 @@ function App() {
           width: '100%',
           boxSizing: 'border-box'
         }}>
-          <div className="fade-in-up">
+          <div className="fade-in-up" style={currentPage === 'chat' ? { height: '100%', display: 'flex', flexDirection: 'column' } : undefined}>
             {renderPage()}
           </div>
         </div>

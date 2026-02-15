@@ -249,12 +249,12 @@ export default function ChatPage() {
         </div>
       </div>
 
-      <div className="figma-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, position: 'relative' }}>
-        {/* 消息区域 */}
+      <div className="figma-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, position: 'relative', overflow: 'hidden' }}>
+        {/* 消息区域 - 只有这里可以滚动 */}
         <div 
           ref={messagesContainerRef}
           onScroll={handleScroll}
-          style={{ flex: 1, overflowY: 'auto', padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}
+          style={{ flex: '1 1 0', overflowY: 'auto', padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', minHeight: 0 }}
         >
           {messages.length === 0 ? (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
