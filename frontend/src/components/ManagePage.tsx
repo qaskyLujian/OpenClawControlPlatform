@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button, Input, Switch, Row, Col, message } from 'antd';
 import { PlusOutlined, DeleteOutlined, EditOutlined, SaveOutlined, ClockCircleOutlined, MessageOutlined, EyeOutlined, SearchOutlined, LeftOutlined, ApiOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { getProviders, createProvider, updateProvider, deleteProvider, setDefaultModel, getTasks, createCronJob, updateCronJob, deleteCronJob, getSessions, getSessionMessages, deleteSession, getChannels, createChannel, updateChannel, deleteChannel, testChannel, startWhatsAppAuth, getWhatsAppAuthStatus, cancelWhatsAppAuth } from '../services/api';
@@ -102,6 +102,7 @@ export default function ManagePage() {
   const [channelFilter, setChannelFilter] = useState<string>('all');
   const [viewingSession, setViewingSession] = useState<SessionInfo | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const chatEndRef = useRef<HTMLDivElement>(null);
   const [chatTotal, setChatTotal] = useState(0);
   const [chatLoading, setChatLoading] = useState(false);
   const [chatOffset, setChatOffset] = useState(0);
@@ -500,6 +501,7 @@ export default function ManagePage() {
       const res = await getSessionMessages(session.sessionId, { limit: 50, offset: 0 });
       setChatMessages(res.data.messages || []);
       setChatTotal(res.data.total || 0);
+      setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     } catch {
       message.error('加载消息失败');
     } finally {
@@ -765,6 +767,7 @@ export default function ManagePage() {
                             </button>
                           </div>
                         )}
+                        <div ref={chatEndRef} />
                       </>
                     )}
                   </div>
