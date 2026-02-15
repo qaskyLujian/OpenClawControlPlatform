@@ -41,7 +41,7 @@ export default function ChatPage() {
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: response.reply,
+        content: response.data?.reply || response.data?.error || '未收到回复',
         timestamp: Date.now()
       };
       setMessages(prev => [...prev, assistantMessage]);
