@@ -64,7 +64,7 @@ router.get('/', async (req, res) => {
 // POST /api/channels - 添加新 channel
 router.post('/', async (req, res) => {
   try {
-    const { name, type, ...channelData } = req.body;
+    const { name, type, ...rawData } = req.body;
     if (!name) return res.status(400).json({ error: 'name is required' });
 
     const config = await fs.readJSON(CONFIG_PATH);
@@ -74,12 +74,39 @@ router.post('/', async (req, res) => {
       return res.status(409).json({ error: 'Channel already exists' });
     }
 
+    // 只写入 OpenClaw 认可的字段，过滤掉前端 UI 字段
+    const VALID_FIELDS = [
+      'enabled', 'dmPolicy', 'groupPolicy', 'streamMode',
+      'botToken', 'token', 'apiKey', 'tokenFile',
+      'allowFrom', 'groupAllowFrom',
+      'webhook', 'webhookUrl', 'webhookSecret', 'webhookPath', 'webhookHost',
+      'guildId', 'server', 'port', 'nickname', 'channels',
+      'phone', 'account', 'workspace', 'password',
+      'replyToMode', 'textChunkLimit', 'chunkMode',
+      'blockStreaming', 'mediaMaxMb', 'timeoutSeconds',
+      'proxy', 'configWrites', 'selfChatMode',
+      'historyLimit', 'dmHistoryLimit',
+      'name', 'capabilities', 'markdown',
+      'actions', 'reactionNotifications', 'reactionLevel',
+      'heartbeat', 'linkPreview', 'responsePrefix',
+      'retry', 'network', 'groups', 'dms',
+      'draftChunk', 'blockStreamingCoalesce',
+      'commands', 'customCommands'
+    ];
+
+    const channelData: Record<string, any> = {};
+    for (const key of VALID_FIELDS) {
+      if (rawData[key] !== undefined) {
+        channelData[key] = rawData[key];
+      }
+    }
+
     // 设置默认值
     config.channels[name] = {
-      enabled: channelData.enabled ?? true,
-      dmPolicy: channelData.dmPolicy || 'pairing',
-      groupPolicy: channelData.groupPolicy || 'allowlist',
-      streamMode: channelData.streamMode || 'partial',
+      enabled: true,
+      dmPolicy: 'pairing',
+      groupPolicy: 'allowlist',
+      streamMode: 'partial',
       ...channelData
     };
 
@@ -95,7 +122,7 @@ router.post('/', async (req, res) => {
 router.put('/:name', async (req, res) => {
   try {
     const { name } = req.params;
-    const channelData = req.body;
+    const rawData = req.body;
     const config = await fs.readJSON(CONFIG_PATH);
 
     if (!config.channels) config.channels = {};
@@ -105,7 +132,34 @@ router.put('/:name', async (req, res) => {
 
     const existing = config.channels[name];
 
-    // 合并配置，保留原有的敏感字段如果没有传新的
+    // 只允许更新 OpenClaw 认可的字段
+    const VALID_FIELDS = [
+      'enabled', 'dmPolicy', 'groupPolicy', 'streamMode',
+      'botToken', 'token', 'apiKey', 'tokenFile',
+      'allowFrom', 'groupAllowFrom',
+      'webhook', 'webhookUrl', 'webhookSecret', 'webhookPath', 'webhookHost',
+      'guildId', 'server', 'port', 'nickname', 'channels',
+      'phone', 'account', 'workspace', 'password',
+      'replyToMode', 'textChunkLimit', 'chunkMode',
+      'blockStreaming', 'mediaMaxMb', 'timeoutSeconds',
+      'proxy', 'configWrites', 'selfChatMode',
+      'historyLimit', 'dmHistoryLimit',
+      'name', 'capabilities', 'markdown',
+      'actions', 'reactionNotifications', 'reactionLevel',
+      'heartbeat', 'linkPreview', 'responsePrefix',
+      'retry', 'network', 'groups', 'dms',
+      'draftChunk', 'blockStreamingCoalesce',
+      'commands', 'customCommands'
+    ];
+
+    const channelData: Record<string, any> = {};
+    for (const key of VALID_FIELDS) {
+      if (rawData[key] !== undefined) {
+        channelData[key] = rawData[key];
+      }
+    }
+
+    // 合并配置
     config.channels[name] = {
       ...existing,
       ...channelData
