@@ -322,7 +322,7 @@ export default function ChatPage() {
             <button
               onClick={() => {
                 setAutoScroll(true);
-                scrollToBottom();
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
               }}
               style={{
                 background: 'var(--figma-blue)',
