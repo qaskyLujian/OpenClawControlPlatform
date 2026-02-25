@@ -122,6 +122,23 @@ cd frontend && npm run dev   # 前端 :5173
 
 支持局域网访问：`http://<your-ip>:5173`
 
+### Linux 部署（systemd）
+
+```bash
+# 复制 service 文件
+sudo cp openclaw-admin.service /etc/systemd/system/openclaw-admin@.service
+
+# 启用并启动（替换 your-username 为实际用户名）
+sudo systemctl daemon-reload
+sudo systemctl enable openclaw-admin@your-username
+sudo systemctl start openclaw-admin@your-username
+
+# 查看状态
+sudo systemctl status openclaw-admin@your-username
+```
+
+> Linux 上系统监控自动使用 `/proc/meminfo` 和 `os.cpus()`，无需额外配置。
+
 ## 📸 界面预览
 
 ### 监控中心

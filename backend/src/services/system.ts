@@ -43,28 +43,43 @@ function sampleCpuFromOs(): number {
   return Math.round((1 - idleDiff / totalDiff) * 100);
 }
 
-// 内存：用 vm_stat（准确匹配活动监视器）
+// 内存：跨平台（macOS 用 vm_stat，Linux 用 /proc/meminfo，兜底用 os 模块）
 async function sampleMemory(): Promise<number> {
+  const platform = os.platform();
   try {
-    const { stdout: vmStat } = await execAsync('vm_stat', { timeout: 2000 });
-    const { stdout: memSize } = await execAsync('/usr/sbin/sysctl -n hw.memsize', { timeout: 2000 });
+    if (platform === 'darwin') {
+      const { stdout: vmStat } = await execAsync('vm_stat', { timeout: 2000 });
+      const { stdout: memSize } = await execAsync('/usr/sbin/sysctl -n hw.memsize', { timeout: 2000 });
 
-    const pageSize = 16384;
-    const totalBytes = parseInt(memSize.trim());
-    const activeMatch = vmStat.match(/Pages active:\s+([\d]+)/);
-    const wiredMatch = vmStat.match(/Pages wired down:\s+([\d]+)/);
-    const compressedMatch = vmStat.match(/Pages occupied by compressor:\s+([\d]+)/);
+      const pageSize = 16384;
+      const totalBytes = parseInt(memSize.trim());
+      const activeMatch = vmStat.match(/Pages active:\s+([\d]+)/);
+      const wiredMatch = vmStat.match(/Pages wired down:\s+([\d]+)/);
+      const compressedMatch = vmStat.match(/Pages occupied by compressor:\s+([\d]+)/);
 
-    if (activeMatch && wiredMatch) {
-      const active = parseInt(activeMatch[1]);
-      const wired = parseInt(wiredMatch[1]);
-      const compressed = parseInt(compressedMatch?.[1] || '0');
-      const usedPages = active + wired + compressed;
-      const totalPages = totalBytes / pageSize;
-      return Math.round((usedPages / totalPages) * 100);
+      if (activeMatch && wiredMatch) {
+        const active = parseInt(activeMatch[1]);
+        const wired = parseInt(wiredMatch[1]);
+        const compressed = parseInt(compressedMatch?.[1] || '0');
+        const usedPages = active + wired + compressed;
+        const totalPages = totalBytes / pageSize;
+        return Math.round((usedPages / totalPages) * 100);
+      }
+    } else if (platform === 'linux') {
+      const { stdout } = await execAsync('cat /proc/meminfo', { timeout: 2000 });
+      const totalMatch = stdout.match(/MemTotal:\s+(\d+)/);
+      const availMatch = stdout.match(/MemAvailable:\s+(\d+)/);
+      if (totalMatch && availMatch) {
+        const total = parseInt(totalMatch[1]);
+        const available = parseInt(availMatch[1]);
+        return Math.round(((total - available) / total) * 100);
+      }
     }
   } catch {}
-  return 0;
+  // 兜底：用 Node.js os 模块
+  const totalMem = os.totalmem();
+  const freeMem = os.freemem();
+  return Math.round(((totalMem - freeMem) / totalMem) * 100);
 }
 
 // 后台采样循环
@@ -123,7 +138,8 @@ export async function getDashboardData(): Promise<DashboardData & { system: { cp
 
 async function getGatewayStatus() {
   try {
-    const { stdout } = await execAsync('/bin/ps -ax -o pid,etime,command');
+    const psCmd = os.platform() === 'darwin' ? '/bin/ps -ax -o pid,etime,command' : 'ps -eo pid,etime,command';
+    const { stdout } = await execAsync(psCmd);
     const lines = stdout.split('\n').filter((l: string) => {
       const trimmed = l.trim();
       return trimmed.includes('openclaw-gateway') && !trimmed.includes('grep') && !trimmed.includes('/bin/ps');
@@ -241,9 +257,29 @@ async function getUsageInfo() {
   }
 }
 
+async function findOpenclawPath(): Promise<string> {
+  // 优先用 which/where 查找
+  try {
+    const cmd = os.platform() === 'win32' ? 'where openclaw' : 'which openclaw';
+    const { stdout } = await execAsync(cmd, { timeout: 3000 });
+    const p = stdout.trim().split('\n')[0];
+    if (p) return p;
+  } catch {}
+  // 兜底：常见 nvm 路径
+  const nvmDir = `${os.homedir()}/.nvm/versions/node`;
+  try {
+    const versions = await fs.readdir(nvmDir);
+    for (const v of versions.sort().reverse()) {
+      const candidate = `${nvmDir}/${v}/bin/openclaw`;
+      if (await fs.pathExists(candidate)) return candidate;
+    }
+  } catch {}
+  return 'openclaw'; // 最终兜底，依赖 PATH
+}
+
 async function fetchChannelsStatus() {
   try {
-    const openclawPath = `${os.homedir()}/.nvm/versions/node/v24.0.2/bin/openclaw`;
+    const openclawPath = await findOpenclawPath();
     const { stdout } = await execAsync(`${openclawPath} status 2>&1`, { timeout: 10000 });
     const lines = stdout.split('\n');
     const channelsIdx = lines.findIndex(l => l.trim().startsWith('Channels'));

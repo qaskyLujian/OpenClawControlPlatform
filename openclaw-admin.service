@@ -1,0 +1,15 @@
+[Unit]
+Description=OpenClaw Admin System
+After=network.target
+
+[Service]
+Type=simple
+User=%i
+WorkingDirectory=%h/openclaw-admin
+ExecStart=/bin/bash start.sh
+Restart=on-failure
+RestartSec=5
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
