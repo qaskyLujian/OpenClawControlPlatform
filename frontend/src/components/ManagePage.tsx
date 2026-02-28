@@ -97,6 +97,7 @@ export default function ManagePage() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [defaultModel, setDefaultModelState] = useState<any>({});
   const [cronJobs, setCronJobs] = useState<CronJob[]>([]);
+  const [cronLoading, setCronLoading] = useState(false);
   const [sessions, setSessions] = useState<SessionInfo[]>([]);
   const [sessionSearch, setSessionSearch] = useState('');
   const [channelFilter, setChannelFilter] = useState<string>('all');
@@ -151,23 +152,34 @@ export default function ManagePage() {
 
   const loadAll = async () => {
     try {
-      const [provRes, taskRes, sessRes, chanRes, modelsRes] = await Promise.all([
-        getProviders(), 
-        getTasks(), 
+      const [provRes, sessRes, chanRes, modelsRes] = await Promise.all([
+        getProviders(),
         getSessions(),
         getChannels(),
         getModels()
       ]);
       setProviders(provRes.data.providers || []);
       setDefaultModelState(provRes.data.defaultModel || {});
-      setCronJobs(taskRes.data.cronJobs || []);
       setSessions(sessRes.data.sessions || []);
       setChannels(chanRes.data.channels || []);
       setAgentModels(modelsRes.data.agents || {});
+      void loadTasks();
     } catch (error) {
       console.error('Failed to load manage data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadTasks = async () => {
+    setCronLoading(true);
+    try {
+      const taskRes = await getTasks();
+      setCronJobs(taskRes.data.cronJobs || []);
+    } catch (error) {
+      console.error('Failed to load tasks:', error);
+    } finally {
+      setCronLoading(false);
     }
   };
 
@@ -600,7 +612,7 @@ export default function ManagePage() {
       message.warning('不能删除主会话');
       return;
     }
-    if (!confirm(`确定删除会话 "${session.label || session.key}"？此操作不可恢复。`)) return;
+    if (!confirm(`确定删除会话 "${getSessionDisplayName(session)}"？此操作不可恢复。`)) return;
     try {
       await deleteSession(session.key);
       message.success('会话已删除');
@@ -632,6 +644,21 @@ export default function ManagePage() {
     if (diff < 3600000) return Math.floor(diff / 60000) + ' 分钟前';
     if (diff < 86400000) return Math.floor(diff / 3600000) + ' 小时前';
     return Math.floor(diff / 86400000) + ' 天前';
+  };
+
+  const AGENT_NAME_MAP: Record<string, string> = {
+    main: '全能小助手',
+    master: '全能小助手',
+    pm: '0号-经理',
+    dev: '1号-开发',
+    qa: '2号-测试'
+  };
+
+  const getAgentDisplayName = (name: string) => AGENT_NAME_MAP[name] || name;
+
+  const getSessionDisplayName = (session: SessionInfo) => {
+    const raw = session.label || session.key.replace('agent:main:', '');
+    return getAgentDisplayName(raw);
   };
 
   // 过滤会话
@@ -702,7 +729,7 @@ export default function ManagePage() {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {session.label || session.key.replace('agent:main:', '')}
+                            {getSessionDisplayName(session)}
                           </span>
                           {session.key === 'agent:main:main' && (
                             <span className="figma-badge figma-badge-yellow" style={{ fontSize: 9 }}>主</span>
@@ -754,7 +781,7 @@ export default function ManagePage() {
                         <LeftOutlined style={{ fontSize: 12 }} />
                       </button>
                       <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
-                        {viewingSession.label || viewingSession.key.replace('agent:main:', '')}
+                        {getSessionDisplayName(viewingSession)}
                       </span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -1109,7 +1136,7 @@ export default function ManagePage() {
                   <Col span={8} key={agentName}>
                     <div className="figma-card" style={{ padding: 'var(--space-3)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{agentName}</span>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{getAgentDisplayName(agentName)}</span>
                         <button onClick={() => handleEditAgentModel(agentName)} style={{ background: 'none', border: 'none', color: 'var(--figma-blue)', cursor: 'pointer', padding: 2 }}>
                           <EditOutlined style={{ fontSize: 13 }} />
                         </button>
@@ -1309,7 +1336,11 @@ export default function ManagePage() {
                 </div>
               )}
 
-              {cronJobs.length === 0 && !showAddCron ? (
+              {cronLoading && !showAddCron ? (
+                <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 30, fontSize: 12 }}>
+                  任务加载中...
+                </div>
+              ) : cronJobs.length === 0 && !showAddCron ? (
                 <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 30, fontSize: 12 }}>
                   暂无定时任务，点击"添加"创建
                 </div>

@@ -7,7 +7,13 @@ import path from 'path';
 
 const router = Router();
 const execAsync = promisify(exec);
-const OPENCLAW = path.join(os.homedir(), '.nvm/versions/node/v24.0.2/bin/openclaw');
+const OPENCLAW = path.join(os.homedir(), '.nvm/versions/node/v22.22.0/bin/openclaw');
+const TASKS_CACHE_TTL_MS = 15000;
+let tasksCache: { timestamp: number; data: { cronJobs: any[]; subagentTasks: any[] } } | null = null;
+
+function invalidateTasksCache() {
+  tasksCache = null;
+}
 
 // 渠道 target 映射文件
 const CHANNEL_TARGETS_PATH = path.join(os.homedir(), '.openclaw', 'admin-channel-targets.json');
@@ -83,8 +89,12 @@ async function cronExec(args: string): Promise<string> {
 }
 
 // GET /api/tasks - 获取所有定时任务
-router.get('/', async (req, res) => {
+router.get('/', async (_req, res) => {
   try {
+    if (tasksCache && Date.now() - tasksCache.timestamp < TASKS_CACHE_TTL_MS) {
+      return res.json(tasksCache.data);
+    }
+
     // 通过 CLI 获取真实 cron jobs
     let cronJobs: any[] = [];
     try {
@@ -130,10 +140,12 @@ router.get('/', async (req, res) => {
       } catch {}
     }
 
-    res.json({ cronJobs, subagentTasks });
+    const data = { cronJobs, subagentTasks };
+    tasksCache = { timestamp: Date.now(), data };
+    return res.json(data);
   } catch (error) {
     console.error('Failed to get tasks:', error);
-    res.status(500).json({ error: 'Failed to get tasks' });
+    return res.status(500).json({ error: 'Failed to get tasks' });
   }
 });
 
@@ -192,7 +204,8 @@ router.post('/cron', async (req, res) => {
     const output = await cronExec(args.join(' '));
     let result;
     try { result = JSON.parse(output); } catch { result = { ok: true, raw: output }; }
-    res.json({ ok: true, job: result });
+    invalidateTasksCache();
+    return res.json({ ok: true, job: result });
   } catch (error: any) {
     console.error('Failed to create cron job:', error);
     res.status(500).json({ error: 'Failed to create cron job', details: error.stderr || error.message });
@@ -218,7 +231,8 @@ router.put('/cron/:id', async (req, res) => {
       await cronExec(`edit ${id} ${editArgs.join(' ')}`);
     }
 
-    res.json({ ok: true });
+    invalidateTasksCache();
+    return res.json({ ok: true });
   } catch (error: any) {
     console.error('Failed to update cron job:', error);
     res.status(500).json({ error: 'Failed to update cron job', details: error.stderr || error.message });
@@ -230,7 +244,8 @@ router.delete('/cron/:id', async (req, res) => {
   try {
     const { id } = req.params;
     await cronExec(`rm ${id}`);
-    res.json({ ok: true });
+    invalidateTasksCache();
+    return res.json({ ok: true });
   } catch (error: any) {
     console.error('Failed to delete cron job:', error);
     res.status(500).json({ error: 'Failed to delete cron job', details: error.stderr || error.message });
@@ -242,7 +257,8 @@ router.post('/cron/:id/run', async (req, res) => {
   try {
     const { id } = req.params;
     const output = await cronExec(`run ${id}`);
-    res.json({ ok: true, result: output });
+    invalidateTasksCache();
+    return res.json({ ok: true, result: output });
   } catch (error: any) {
     console.error('Failed to run cron job:', error);
     res.status(500).json({ error: 'Failed to run cron job', details: error.stderr || error.message });

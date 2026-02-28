@@ -20,6 +20,9 @@ interface SessionItem {
   active: boolean;
   messageCount: number;
   tokenCount: number;
+  label?: string;
+  kind?: string;
+  model?: string;
 }
 
 interface ModelProvider {
@@ -78,34 +81,37 @@ export default function MonitorPage() {
       memHistoryRef.current = [...memHistoryRef.current.slice(-9), newData.system.memory];
     });
 
-    // 每 30 秒刷新会话、模型、技能、日志
+    // 每 30 秒刷新会话和日志，任务每分钟刷新
     const interval = setInterval(() => {
       loadSessions();
       loadLogs();
     }, 30000);
+    const taskInterval = setInterval(() => {
+      loadTasks();
+    }, 60000);
 
     return () => {
       socket.off('dashboard:update');
       clearInterval(interval);
+      clearInterval(taskInterval);
     };
   }, []);
 
   const loadAll = async () => {
     try {
-      const [dashRes, sessRes, modRes, skillRes, logRes, taskRes] = await Promise.all([
+      const [dashRes, sessRes, modRes, skillRes, logRes] = await Promise.all([
         getDashboardData(),
         getSessions(),
         getModels(),
         getSkills(),
-        getLogs(),
-        getTasks()
+        getLogs()
       ]);
       setDashboard(dashRes.data);
       setSessions(sessRes.data.sessions || []);
       setModels(modRes.data.providers || []);
       setSkills(skillRes.data.skills || []);
       setLogs(logRes.data.logs || []);
-      setSubagentTasks(taskRes.data.subagentTasks || []);
+      void loadTasks();
 
       // 初始化历史
       if (dashRes.data.system) {
@@ -130,6 +136,13 @@ export default function MonitorPage() {
     try {
       const res = await getLogs();
       setLogs(res.data.logs || []);
+    } catch {}
+  };
+
+  const loadTasks = async () => {
+    try {
+      const res = await getTasks();
+      setSubagentTasks(res.data.subagentTasks || []);
     } catch {}
   };
 
@@ -198,6 +211,16 @@ export default function MonitorPage() {
 
   // 计算模型总使用量
   const totalModelTokens = models.reduce((sum, p) => sum + (p.totalTokens || 0), 0);
+
+  const AGENT_NAME_MAP: Record<string, string> = {
+    main: '全能小助手',
+    master: '全能小助手',
+    pm: '0号-经理',
+    dev: '1号-开发',
+    qa: '2号-测试'
+  };
+
+  const getAgentDisplayName = (name: string) => AGENT_NAME_MAP[name] || name;
 
   return (
     <div className="content-container">
@@ -351,15 +374,12 @@ export default function MonitorPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                     <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '70%' }}>
                       {(() => {
-                        // 优先显示 label
-                        if (session.label) return session.label;
-                        
-                        // 孤立会话显示 sessionId 前 8 位
+                        if (session.label) return getAgentDisplayName(session.label);
+
                         if (session.key.startsWith('orphan:')) {
                           return `会话 ${session.sessionId.substring(0, 8)}`;
                         }
-                        
-                        // 主会话根据 channel 显示友好名称
+
                         const keyParts = session.key.split(':');
                         if (keyParts.length >= 3) {
                           const channel = keyParts[2];
@@ -368,10 +388,9 @@ export default function MonitorPage() {
                           if (channel === 'whatsapp') return keyParts[3] ? `WhatsApp ${keyParts[3]}` : 'WhatsApp';
                           if (channel === 'discord') return 'Discord';
                           if (channel === 'signal') return 'Signal';
-                          return channel;
+                          return getAgentDisplayName(channel);
                         }
-                        
-                        // 兜底：显示 sessionId 前 8 位
+
                         return `会话 ${session.sessionId.substring(0, 8)}`;
                       })()}
                     </span>
