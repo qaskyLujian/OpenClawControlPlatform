@@ -1,17 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { PaperClipOutlined, SendOutlined, DeleteOutlined, FileOutlined, DownloadOutlined, PictureOutlined, GlobalOutlined, FilePptOutlined } from '@ant-design/icons';
+import { PaperClipOutlined, SendOutlined, DeleteOutlined, FileOutlined, DownloadOutlined, PictureOutlined, GlobalOutlined, FilePptOutlined, BoldOutlined, SmileOutlined } from '@ant-design/icons';
 import TranslatePanel from './TranslatePanel';
 import PptPanel from './PptPanel';
 
-// 动态 API 地址，和 api.ts 保持一致
-const getApiBase = () => {
-  const hostname = window.location.hostname;
-  if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-    return `http://${hostname}:7749`;
-  }
-  return import.meta.env.VITE_API_URL || 'http://localhost:7749';
-};
-const API_BASE = getApiBase();
+const API_BASE = `${window.location.protocol}//${window.location.host}`;
 
 interface ChatFile {
   name: string;
@@ -27,6 +19,7 @@ interface Message {
   timestamp: number;
   files?: ChatFile[];
   outputFiles?: ChatFile[];
+  textStyle?: { fontSize?: number; color?: string; fontFamily?: string; isBold?: boolean };
 }
 
 export default function ChatPage() {
@@ -36,6 +29,36 @@ export default function ChatPage() {
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [lastSync, setLastSync] = useState(0);
   const [autoScroll, setAutoScroll] = useState(true);
+  const [isBold, setIsBoldRaw] = useState(() => localStorage.getItem('chat_isBold') === 'true');
+  const setIsBold = (v: boolean | ((p: boolean) => boolean)) => {
+    setIsBoldRaw(prev => { const next = typeof v === 'function' ? v(prev) : v; localStorage.setItem('chat_isBold', String(next)); return next; });
+  };
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [textColor, setTextColorRaw] = useState(() => localStorage.getItem('chat_textColor') || '#ffffff');
+  const setTextColor = (v: string) => { localStorage.setItem('chat_textColor', v); setTextColorRaw(v); };
+  const [fontSize, setFontSizeRaw] = useState(() => localStorage.getItem('chat_fontSize') || '14');
+  const setFontSize = (v: string) => { localStorage.setItem('chat_fontSize', v); setFontSizeRaw(v); };
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const insertAtCursor = (text: string) => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const newVal = input.slice(0, start) + text + input.slice(end);
+    setInput(newVal);
+    setTimeout(() => {
+      ta.focus();
+      ta.setSelectionRange(start + text.length, start + text.length);
+    }, 0);
+  };
+
+  const FONTS = ['默认', '宋体', '黑体', '楷体', 'monospace'];
+  const [fontFamily, setFontFamilyRaw] = useState(() => localStorage.getItem('chat_fontFamily') || '默认');
+  const setFontFamily = (v: string) => { localStorage.setItem('chat_fontFamily', v); setFontFamilyRaw(v); };
+  const EMOJIS = ['😀','😂','🥰','😎','🤔','👍','🙏','🔥','💡','✅','❌','🎉','💪','👀','🚀','😅','🤣','😭','😤','🥳'];
+  const COLORS = ['#ffffff','#ff4d4f','#faad14','#52c41a','#1890ff','#722ed1','#eb2f96','#13c2c2'];
+
   const [showTranslate, setShowTranslate] = useState(false);
   const [showPpt, setShowPpt] = useState(false);
   const prevMessageCountRef = useRef(0);
@@ -43,13 +66,6 @@ export default function ChatPage() {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const scrollToBottom = () => {
-    if (autoScroll) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  // 检测用户是否在底部
   const handleScroll = () => {
     const container = messagesContainerRef.current;
     if (!container) return;
@@ -60,14 +76,16 @@ export default function ChatPage() {
   // 只在消息数量变化时自动滚动（新消息到达或发送）
   useEffect(() => {
     if (messages.length > prevMessageCountRef.current) {
-      scrollToBottom();
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
     prevMessageCountRef.current = messages.length;
-  }, [messages.length, autoScroll]);
+  }, [messages.length]);
 
   // 定期同步会话历史（每 5 秒）
   useEffect(() => {
     const syncHistory = async () => {
+      // 发送中时跳过覆盖，避免乐观消息被清除
+      if (loading) return;
       try {
         const token = localStorage.getItem('auth_token') || 'wj12345';
         const resp = await fetch(`${API_BASE}/api/chat/history?limit=50`, {
@@ -87,24 +105,27 @@ export default function ChatPage() {
     syncHistory(); // 初始加载
     const interval = setInterval(syncHistory, 5000); // 每 5 秒同步
     return () => clearInterval(interval);
-  }, []);
+  }, [loading]);
 
   const handleSend = async () => {
-    if ((!input.trim() && pendingFiles.length === 0) || loading) return;
+    const rawContent = input.trim();
+    if ((!rawContent && pendingFiles.length === 0) || loading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: input.trim(),
+      content: rawContent,
       timestamp: Date.now(),
-      files: pendingFiles.map(f => ({ name: f.name, path: '', size: f.size, type: f.type }))
+      files: pendingFiles.map(f => ({ name: f.name, path: '', size: f.size, type: f.type })),
+      textStyle: { fontSize: parseInt(fontSize), color: textColor, fontFamily: fontFamily === '默认' ? undefined : fontFamily, isBold }
     };
 
     setMessages(prev => [...prev, userMessage]);
-    const currentInput = input.trim();
+    const currentInput = rawContent;
     const currentFiles = [...pendingFiles];
     setInput('');
     setPendingFiles([]);
+    setIsBold(false);
     setLoading(true);
 
     try {
@@ -149,13 +170,6 @@ export default function ChatPage() {
       }]);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
     }
   };
 
@@ -267,45 +281,79 @@ export default function ChatPage() {
               <div style={{ color: 'var(--text-tertiary)', fontSize: 12 }}>支持文字、图片、文档等多种格式输入输出</div>
             </div>
           ) : (
-            messages.map(msg => (
-              <div key={msg.id} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
-                <div style={{
-                  maxWidth: '75%', padding: 'var(--space-3)',
-                  borderRadius: msg.role === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
-                  background: msg.role === 'user' ? 'var(--figma-blue)' : 'var(--bg-tertiary)',
-                  color: msg.role === 'user' ? '#ffffff' : 'var(--text-primary)',
-                  border: msg.role === 'assistant' ? '1px solid var(--border-subtle)' : 'none'
-                }}>
-                  {msg.content && (
-                    <div style={{ fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                      {msg.content}
+            messages.map((msg, idx) => {
+              // 判断是否显示时间戳（与上一条消息间隔超过5分钟）
+              const showTime = idx === 0 || (msg.timestamp - messages[idx - 1].timestamp > 5 * 60 * 1000);
+              return (
+                <div key={msg.id}>
+                  {showTime && (
+                    <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-tertiary)', margin: '12px 0 8px' }}>
+                      {new Date(msg.timestamp).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })}
                     </div>
                   )}
-                  {msg.files && msg.files.length > 0 && renderFiles(msg.files)}
-                  {msg.outputFiles && msg.outputFiles.length > 0 && (
-                    <>
-                      {renderFiles(msg.outputFiles, true)}
-                      {renderImagePreview(msg.outputFiles)}
-                    </>
-                  )}
-                  <div style={{
-                    fontSize: 10, marginTop: 6,
-                    color: msg.role === 'user' ? 'rgba(255,255,255,0.6)' : '#666'
-                  }}>
-                    {msg.role === 'user' ? '👤' : '🤖'} {new Date(msg.timestamp).toLocaleTimeString('zh-CN', { hour12: false })}
+                  <div style={{ display: 'flex', gap: 10, justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start', alignItems: 'flex-start' }}>
+                    {msg.role === 'assistant' && (
+                      <div style={{
+                        width: 40, height: 40, borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #4e8ff0, #6b9ff7)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 20, flexShrink: 0
+                      }}>🤖</div>
+                    )}
+                    <div style={{
+                      maxWidth: '65%', padding: '10px 14px',
+                      borderRadius: msg.role === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
+                      background: msg.role === 'user' ? 'var(--figma-blue)' : 'var(--bg-tertiary)',
+                      color: msg.role === 'user' ? '#ffffff' : 'var(--text-primary)',
+                      border: msg.role === 'assistant' ? '1px solid var(--border-subtle)' : 'none',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                    }}>
+                      {msg.content && (
+                        <div style={{
+                          fontSize: msg.textStyle?.fontSize ?? 14,
+                          lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                          color: msg.role === 'user' ? (msg.textStyle?.color ?? '#ffffff') : 'var(--text-primary)',
+                          fontFamily: msg.textStyle?.fontFamily || 'inherit',
+                          fontWeight: msg.textStyle?.isBold ? 700 : 400,
+                        }}>
+                          {msg.content}
+                        </div>
+                      )}
+                      {msg.files && msg.files.length > 0 && renderFiles(msg.files)}
+                      {msg.outputFiles && msg.outputFiles.length > 0 && (
+                        <>
+                          {renderFiles(msg.outputFiles, true)}
+                          {renderImagePreview(msg.outputFiles)}
+                        </>
+                      )}
+                    </div>
+                    {msg.role === 'user' && (
+                      <div style={{
+                        width: 40, height: 40, borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #1bc47d, #22d68a)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 20, flexShrink: 0
+                      }}>👤</div>
+                    )}
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
           {loading && (
-            <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-start', alignItems: 'flex-start' }}>
               <div style={{
-                padding: 'var(--space-3)', borderRadius: 'var(--radius-md)',
+                width: 40, height: 40, borderRadius: '50%',
+                background: 'linear-gradient(135deg, #4e8ff0, #6b9ff7)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 20, flexShrink: 0
+              }}>🤖</div>
+              <div style={{
+                padding: '10px 14px', borderRadius: '12px 12px 12px 2px',
                 background: 'var(--bg-tertiary)', border: '1px solid var(--border-subtle)',
                 display: 'flex', alignItems: 'center', gap: 6
               }}>
-                <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>🤖 思考中</span>
+                <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>思考中</span>
                 <span style={{ display: 'inline-flex', gap: 3 }}>
                   {[0, 1, 2].map(i => (
                     <span key={i} style={{
@@ -407,50 +455,86 @@ export default function ChatPage() {
           {showPpt && (
             <PptPanel onClose={() => setShowPpt(false)} />
           )}
-          <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'flex-end' }}>
+          {/* 格式工具栏 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', marginBottom: 6, flexWrap: 'wrap' }}>
+            {/* 加粗 */}
+            <button onClick={() => setIsBold(v => !v)} title="加粗" style={{ background: isBold ? 'var(--figma-blue)' : 'none', border: '1px solid var(--border-subtle)', borderRadius: 4, color: isBold ? '#fff' : 'var(--text-secondary)', cursor: 'pointer', padding: '4px 12px', fontWeight: 700, fontSize: 16 }}>
+              <BoldOutlined />
+            </button>
+            {/* 字号 */}
+            <select value={fontSize} onChange={e => setFontSize(e.target.value)} title="字号"
+              style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 4, color: 'var(--text-secondary)', padding: '4px 8px', fontSize: 15, cursor: 'pointer' }}>
+              {['12','14','16','18','20','24'].map(s => <option key={s} value={s}>{s}px</option>)}
+            </select>
+            {/* 字体 */}
+            <select value={fontFamily} onChange={e => setFontFamily(e.target.value)} title="字体"
+              style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 4, color: 'var(--text-secondary)', padding: '4px 8px', fontSize: 15, cursor: 'pointer' }}>
+              {FONTS.map(f => <option key={f} value={f}>{f}</option>)}
+            </select>
+            {/* 颜色 */}
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              {COLORS.map(c => (
+                <div key={c} onClick={() => setTextColor(c)} style={{ width: 20, height: 20, borderRadius: '50%', background: c, cursor: 'pointer', border: textColor === c ? '2px solid var(--figma-blue)' : '1px solid var(--border-subtle)' }} />
+              ))}
+            </div>
+            <div style={{ width: 1, height: 24, background: 'var(--border-subtle)' }} />
+            {/* 表情 */}
+            <div style={{ position: 'relative' }}>
+              <button onClick={() => setShowEmojiPicker(v => !v)} title="表情" style={{ background: showEmojiPicker ? 'var(--figma-blue)' : 'none', border: '1px solid var(--border-subtle)', borderRadius: 4, color: showEmojiPicker ? '#fff' : 'var(--text-secondary)', cursor: 'pointer', padding: '4px 12px', fontSize: 16 }}>
+                <SmileOutlined />
+              </button>
+              {showEmojiPicker && (
+                <div style={{ position: 'absolute', bottom: 40, left: 0, background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: 10, display: 'flex', flexWrap: 'wrap', gap: 6, width: 240, zIndex: 100, boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}>
+                  {EMOJIS.map(e => (
+                    <span key={e} onClick={() => { insertAtCursor(e); setShowEmojiPicker(false); }} style={{ fontSize: 24, cursor: 'pointer', padding: 2, borderRadius: 4, lineHeight: 1 }}>{e}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+            {/* 右侧弹性空间 */}
+            <div style={{ flex: 1 }} />
+            <div style={{ width: 1, height: 24, background: 'var(--border-subtle)' }} />
+            {/* 文件上传 */}
             <input type="file" ref={fileInputRef} multiple onChange={handleFileSelect}
               accept="image/*,.pdf,.csv,.xlsx,.json,.txt,.md,.html,.py,.js,.ts,.zip,.docx"
               style={{ display: 'none' }} />
-            <button onClick={() => fileInputRef.current?.click()} disabled={loading}
-              style={{
-                background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)',
-                color: pendingFiles.length > 0 ? 'var(--figma-blue)' : 'var(--text-tertiary)', cursor: 'pointer',
-                padding: '8px 10px', transition: 'all 0.2s', flexShrink: 0
-              }}
-              title="上传文件">
-              <PaperClipOutlined style={{ fontSize: 16 }} />
+            <button onClick={() => fileInputRef.current?.click()} disabled={loading} title="上传文件"
+              style={{ background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 4, color: pendingFiles.length > 0 ? 'var(--figma-blue)' : 'var(--text-tertiary)', cursor: 'pointer', padding: '4px 12px', fontSize: 16 }}>
+              <PaperClipOutlined />
             </button>
-            <button onClick={() => setShowTranslate(v => !v)}
-              style={{
-                background: showTranslate ? 'var(--figma-blue)' : 'none',
-                border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)',
-                color: showTranslate ? '#fff' : 'var(--text-tertiary)',
-                cursor: 'pointer', padding: '8px 10px', transition: 'all 0.2s', flexShrink: 0
-              }}
-              title="翻译">
-              <GlobalOutlined style={{ fontSize: 16 }} />
+            {/* 翻译 */}
+            <button onClick={() => setShowTranslate(v => !v)} title="翻译"
+              style={{ background: showTranslate ? 'var(--figma-blue)' : 'none', border: '1px solid var(--border-subtle)', borderRadius: 4, color: showTranslate ? '#fff' : 'var(--text-tertiary)', cursor: 'pointer', padding: '4px 12px', fontSize: 16 }}>
+              <GlobalOutlined />
             </button>
-            <button onClick={() => setShowPpt(v => !v)}
-              style={{
-                background: showPpt ? 'var(--figma-purple)' : 'none',
-                border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)',
-                color: showPpt ? '#fff' : 'var(--text-tertiary)',
-                cursor: 'pointer', padding: '8px 10px', transition: 'all 0.2s', flexShrink: 0
-              }}
-              title="生成 PPT">
-              <FilePptOutlined style={{ fontSize: 16 }} />
+            {/* PPT */}
+            <button onClick={() => setShowPpt(v => !v)} title="生成 PPT"
+              style={{ background: showPpt ? 'var(--figma-purple)' : 'none', border: '1px solid var(--border-subtle)', borderRadius: 4, color: showPpt ? '#fff' : 'var(--text-tertiary)', cursor: 'pointer', padding: '4px 12px', fontSize: 16 }}>
+              <FilePptOutlined />
             </button>
+          </div>
+          <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'flex-end' }}>
             <textarea
-              value={input} onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
               placeholder="输入消息... (Enter 发送, Shift+Enter 换行)"
               disabled={loading}
               style={{
                 flex: 1, padding: '8px 12px', background: 'var(--bg-primary)',
                 border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)',
-                color: 'var(--text-primary)', fontSize: 13, fontFamily: 'inherit',
-                resize: 'none', minHeight: 44, maxHeight: 200, lineHeight: 1.5,
-                outline: 'none'
+                color: textColor, fontSize: parseInt(fontSize),
+                fontFamily: fontFamily === '默认' ? 'inherit' : fontFamily,
+                fontWeight: isBold ? 700 : 400,
+                lineHeight: 1.5, outline: 'none', boxSizing: 'border-box',
+                resize: 'vertical', minHeight: parseInt(fontSize) * 1.5 * 4 + 16,
+                opacity: loading ? 0.5 : 1,
               }}
             />
             <button onClick={handleSend}
@@ -460,7 +544,7 @@ export default function ChatPage() {
                 border: 'none', borderRadius: 'var(--radius-sm)',
                 color: 'var(--text-primary)', cursor: loading ? 'not-allowed' : 'pointer',
                 padding: '8px 16px', fontSize: 13, fontWeight: 500,
-                transition: 'all 0.2s', flexShrink: 0, minWidth: 70
+                transition: 'all 0.2s', flexShrink: 0, minWidth: 70, alignSelf: 'stretch'
               }}>
               {loading ? '...' : <><SendOutlined style={{ marginRight: 4 }} />发送</>}
             </button>
