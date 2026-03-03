@@ -66,7 +66,7 @@ export default function Sidebar({ currentPage, onPageChange, theme, onToggleThem
               color: 'var(--text-primary)',
               letterSpacing: '0.5px'
             }}>
-              OpenClaw 剑控系统
+              OpenClaw管控中心
             </div>
           </div>
         </div>

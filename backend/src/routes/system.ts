@@ -6,7 +6,7 @@ import path from 'path';
 
 const router = Router();
 const execAsync = promisify(exec);
-const OPENCLAW = path.join(os.homedir(), '.nvm/versions/node/v24.0.2/bin/openclaw');
+const OPENCLAW = path.join(os.homedir(), '.nvm/versions/node/v22.22.0/bin/openclaw');
 const ENV = { ...process.env, PATH: `${path.dirname(OPENCLAW)}:${process.env.PATH}` };
 
 // POST /api/system/restart - 重启 Gateway

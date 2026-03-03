@@ -704,7 +704,7 @@ export default function ManagePage() {
               onChange={e => setSessionSearch(e.target.value)}
               style={{ flex: 1, background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} />
             <select value={channelFilter} onChange={e => setChannelFilter(e.target.value)}
-              style={{ padding: '2px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12 }}>
+              style={{ padding: '2px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }}>
               <option value="all">全部渠道</option>
               {sessionChannels.map(ch => <option key={ch} value={ch}>{ch}</option>)}
             </select>
@@ -715,7 +715,7 @@ export default function ManagePage() {
             <Col span={viewingSession ? 10 : 24}>
               <div style={{ maxHeight: 400, overflowY: 'auto' }}>
                 {filteredSessions.length === 0 ? (
-                  <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 30, fontSize: 12 }}>暂无会话</div>
+                  <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 30, fontSize: 15 }}>暂无会话</div>
                 ) : filteredSessions.map((session) => (
                   <div key={session.key} className="figma-card" style={{
                     padding: 'var(--space-2) var(--space-3)', marginBottom: 6, cursor: 'pointer',
@@ -728,11 +728,11 @@ export default function ManagePage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingLeft: session.active ? 8 : 0 }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {getSessionDisplayName(session)}
                           </span>
                           {session.key === 'agent:main:main' && (
-                            <span className="figma-badge figma-badge-yellow" style={{ fontSize: 9 }}>主</span>
+                            <span className="figma-badge figma-badge-yellow" style={{ fontSize: 15 }}>主</span>
                           )}
                         </div>
                         <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 4, flexWrap: 'wrap' }}>
@@ -744,7 +744,7 @@ export default function ManagePage() {
                           </span>
                           {session.kind !== 'main' && <span className="figma-badge figma-badge-yellow">{session.kind}</span>}
                         </div>
-                        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', display: 'flex', gap: 'var(--space-3)' }}>
+                        <div style={{ fontSize: 14, color: 'var(--text-tertiary)', display: 'flex', gap: 'var(--space-3)' }}>
                           <span>消息 {session.messageCount}</span>
                           <span>Token {session.tokenCount > 1000 ? (session.tokenCount / 1000).toFixed(1) + 'K' : session.tokenCount}</span>
                           <span>{formatFileSize(session.fileSize)}</span>
@@ -778,9 +778,9 @@ export default function ManagePage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <button onClick={() => { setViewingSession(null); setChatMessages([]); }}
                         style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: 0 }}>
-                        <LeftOutlined style={{ fontSize: 12 }} />
+                        <LeftOutlined style={{ fontSize: 15 }} />
                       </button>
-                      <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
+                      <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>
                         {getSessionDisplayName(viewingSession)}
                       </span>
                     </div>
@@ -788,33 +788,33 @@ export default function ManagePage() {
                       {(viewingSession.channels || []).length > 1 && (
                         <>
                           <button onClick={() => handleMsgChannelFilter('')}
-                            style={{ background: !msgChannelFilter ? 'var(--figma-blue)' : 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 10, padding: '1px 6px', cursor: 'pointer' }}>
+                            style={{ background: !msgChannelFilter ? 'var(--figma-blue)' : 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 16, padding: '1px 6px', cursor: 'pointer' }}>
                             全部
                           </button>
                           {(viewingSession.channels || []).map(ch => (
                             <button key={ch} onClick={() => handleMsgChannelFilter(ch)}
-                              style={{ background: msgChannelFilter === ch ? 'var(--figma-blue)' : 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 10, padding: '1px 6px', cursor: 'pointer' }}>
+                              style={{ background: msgChannelFilter === ch ? 'var(--figma-blue)' : 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 16, padding: '1px 6px', cursor: 'pointer' }}>
                               {ch}
                             </button>
                           ))}
                         </>
                       )}
-                      <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{chatTotal} 条</span>
+                      <span style={{ fontSize: 14, color: 'var(--text-tertiary)' }}>{chatTotal} 条</span>
                     </div>
                   </div>
                   {/* 消息列表 */}
                   <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--space-2) var(--space-3)' }}>
                     {chatLoading && chatMessages.length === 0 ? (
-                      <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 40, fontSize: 12 }}>加载中...</div>
+                      <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 40, fontSize: 15 }}>加载中...</div>
                     ) : chatMessages.length === 0 ? (
-                      <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 40, fontSize: 12 }}>暂无消息</div>
+                      <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 40, fontSize: 15 }}>暂无消息</div>
                     ) : (
                       <>
                         {/* 加载更多按钮在顶部 */}
                         {chatMessages.length < chatTotal && (
                           <div style={{ textAlign: 'center', padding: 'var(--space-2)' }}>
                             <button onClick={handleLoadMoreMessages} disabled={chatLoading}
-                              style={{ background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--figma-blue)', padding: '4px 16px', cursor: 'pointer', fontSize: 11 }}>
+                              style={{ background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--figma-blue)', padding: '4px 16px', cursor: 'pointer', fontSize: 14 }}>
                               {chatLoading ? '加载中...' : `加载更早消息 (${chatMessages.length}/${chatTotal})`}
                             </button>
                           </div>
@@ -832,17 +832,17 @@ export default function ManagePage() {
                               borderRadius: msg.role === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
                               background: msg.role === 'user' ? 'var(--figma-blue)' : 'var(--bg-primary)',
                               border: msg.role === 'user' ? 'none' : '1px solid var(--border-subtle)',
-                              fontSize: 12, color: 'var(--text-primary)', lineHeight: 1.5,
+                              fontSize: 15, color: 'var(--text-primary)', lineHeight: 1.5,
                               whiteSpace: 'pre-wrap', wordBreak: 'break-word'
                             }}>
                               {msg.text || '(空消息)'}
                               {msg.fullLength > 2000 && (
-                                <div style={{ fontSize: 10, color: msg.role === 'user' ? 'rgba(255,255,255,0.7)' : 'var(--text-tertiary)', marginTop: 4 }}>
+                                <div style={{ fontSize: 16, color: msg.role === 'user' ? 'rgba(255,255,255,0.7)' : 'var(--text-tertiary)', marginTop: 4 }}>
                                   ... 已截断 ({msg.fullLength} 字符)
                                 </div>
                               )}
                             </div>
-                            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2, padding: '0 4px' }}>
+                            <div style={{ fontSize: 16, color: 'var(--text-tertiary)', marginTop: 2, padding: '0 4px' }}>
                               {msg.role === 'user' ? '👤' : '🤖'} {formatTime(msg.timestamp)}
                               {msg.channel && msg.channel !== 'unknown' && (
                                 <span style={{ marginLeft: 6, color: msg.channel === 'telegram' ? '#2AABEE' : msg.channel === 'webchat' ? '#4CAF50' : 'var(--text-tertiary)' }}>
@@ -878,9 +878,9 @@ export default function ManagePage() {
             <span className="figma-badge figma-badge-blue">{providers.length} 个</span>
             <button onClick={() => setShowAddProvider(!showAddProvider)} style={{
               background: 'none', border: '1px solid var(--figma-blue)', borderRadius: 'var(--radius-sm)',
-              color: 'var(--figma-blue)', fontSize: 11, padding: '2px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4
+              color: 'var(--figma-blue)', fontSize: 14, padding: '2px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4
             }}>
-              <PlusOutlined style={{ fontSize: 10 }} /> 添加
+              <PlusOutlined style={{ fontSize: 16 }} /> 添加
             </button>
           </div>
         </div>
@@ -892,49 +892,49 @@ export default function ManagePage() {
               background: 'var(--bg-tertiary)', border: '1px solid var(--figma-blue)',
               borderRadius: 'var(--radius-sm)', animation: 'slideIn 0.2s ease'
             }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 12 }}>添加新 Provider</div>
+              <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 12 }}>添加新 Provider</div>
               <Row gutter={[12, 8]}>
                 <Col span={6}>
-                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>名称</div>
+                  <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>名称</div>
                   <Input size="small" placeholder="my-provider" value={newProvider.name}
                     onChange={e => setNewProvider({ ...newProvider, name: e.target.value })}
                     style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} />
                 </Col>
                 <Col span={6}>
-                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>API 类型</div>
+                  <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>API 类型</div>
                   <select value={newProvider.api} onChange={e => setNewProvider({ ...newProvider, api: e.target.value })}
-                    style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12 }}>
+                    style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }}>
                     <option value="openai-completions">OpenAI Completions</option>
                     <option value="openai-responses">OpenAI Responses</option>
                     <option value="anthropic-messages">Anthropic Messages</option>
                   </select>
                 </Col>
                 <Col span={6}>
-                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Base URL</div>
+                  <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>Base URL</div>
                   <Input size="small" placeholder="https://api.example.com/v1" value={newProvider.baseUrl}
                     onChange={e => setNewProvider({ ...newProvider, baseUrl: e.target.value })}
                     style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} />
                 </Col>
                 <Col span={6}>
-                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>API Key</div>
+                  <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>API Key</div>
                   <Input.Password size="small" placeholder="sk-..." value={newProvider.apiKey}
                     onChange={e => setNewProvider({ ...newProvider, apiKey: e.target.value })}
                     style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} />
                 </Col>
               </Row>
               <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                <button onClick={() => setShowAddProvider(false)} style={{ background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', padding: '4px 12px', cursor: 'pointer', fontSize: 12 }}>取消</button>
-                <button onClick={handleAddProvider} style={{ background: 'var(--figma-blue)', border: 'none', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', padding: '4px 12px', cursor: 'pointer', fontSize: 12 }}>确认添加</button>
+                <button onClick={() => setShowAddProvider(false)} style={{ background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', padding: '4px 12px', cursor: 'pointer', fontSize: 15 }}>取消</button>
+                <button onClick={handleAddProvider} style={{ background: 'var(--figma-blue)', border: 'none', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', padding: '4px 12px', cursor: 'pointer', fontSize: 15 }}>确认添加</button>
               </div>
             </div>
           )}
 
           {/* 默认模型 */}
           <div style={{ marginBottom: 'var(--space-3)', padding: 'var(--space-2)', background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-            <span style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 70 }}>默认模型:</span>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--figma-blue)' }}>{defaultModel.primary || '未设置'}</span>
+            <span style={{ fontSize: 15, color: 'var(--text-secondary)', minWidth: 70 }}>默认模型:</span>
+            <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--figma-blue)' }}>{defaultModel.primary || '未设置'}</span>
             {defaultModel.fallbacks?.length > 0 && (
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>fallback: {defaultModel.fallbacks.join(', ')}</span>
+              <span style={{ fontSize: 14, color: 'var(--text-tertiary)' }}>fallback: {defaultModel.fallbacks.join(', ')}</span>
             )}
           </div>
 
@@ -947,53 +947,53 @@ export default function ManagePage() {
                     <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{provider.name}</span>
                     <div style={{ display: 'flex', gap: 4 }}>
                       <button onClick={() => handleEditProvider(provider)} style={{ background: 'none', border: 'none', color: 'var(--figma-blue)', cursor: 'pointer', padding: 2 }}>
-                        <EditOutlined style={{ fontSize: 13 }} />
+                        <EditOutlined style={{ fontSize: 16 }} />
                       </button>
                       <button onClick={() => handleDeleteProvider(provider.name)} style={{ background: 'none', border: 'none', color: 'var(--figma-red)', cursor: 'pointer', padding: 2 }}>
-                        <DeleteOutlined style={{ fontSize: 13 }} />
+                        <DeleteOutlined style={{ fontSize: 16 }} />
                       </button>
                     </div>
                   </div>
 
                   {editingProvider === provider.name ? (
-                    <div style={{ fontSize: 12 }}>
+                    <div style={{ fontSize: 15 }}>
                       <div style={{ marginBottom: 6 }}>
-                        <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 11 }}>API 类型</div>
+                        <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 14 }}>API 类型</div>
                         <select value={editForm.api} onChange={e => setEditForm({ ...editForm, api: e.target.value })}
-                          style={{ width: '100%', padding: '3px 6px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 11 }}>
+                          style={{ width: '100%', padding: '3px 6px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 14 }}>
                           <option value="openai-completions">OpenAI Completions</option>
                           <option value="openai-responses">OpenAI Responses</option>
                           <option value="anthropic-messages">Anthropic Messages</option>
                         </select>
                       </div>
                       <div style={{ marginBottom: 6 }}>
-                        <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 11 }}>Base URL</div>
+                        <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 14 }}>Base URL</div>
                         <Input size="small" value={editForm.baseUrl} onChange={e => setEditForm({ ...editForm, baseUrl: e.target.value })}
-                          style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 11 }} />
+                          style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 14 }} />
                       </div>
                       <div style={{ marginBottom: 8 }}>
-                        <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 11 }}>
+                        <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 14 }}>
                           API Key 
                           {provider.hasApiKey && (
-                            <span style={{ marginLeft: 6, color: '#4e8ff0', fontSize: 10 }}>
+                            <span style={{ marginLeft: 6, color: '#4e8ff0', fontSize: 16 }}>
                               (当前: {provider.apiKey})
                             </span>
                           )}
                         </div>
                         <Input.Password size="small" value={editForm.apiKey} onChange={e => setEditForm({ ...editForm, apiKey: e.target.value })}
                           placeholder={provider.hasApiKey ? "留空保持原值" : "输入 API Key"}
-                          style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 11 }} />
+                          style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 14 }} />
                       </div>
 
                       {/* 模型列表编辑 */}
                       <div style={{ marginBottom: 8, borderTop: '1px solid var(--border-subtle)', paddingTop: 8 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                          <span style={{ color: 'var(--text-secondary)', fontSize: 11 }}>模型配置</span>
+                          <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>模型配置</span>
                           <button onClick={handleAddModel} style={{
                             background: 'none', border: '1px solid var(--figma-blue)', borderRadius: 'var(--radius-sm)',
-                            color: 'var(--figma-blue)', fontSize: 10, padding: '1px 6px', cursor: 'pointer'
+                            color: 'var(--figma-blue)', fontSize: 16, padding: '1px 6px', cursor: 'pointer'
                           }}>
-                            <PlusOutlined style={{ fontSize: 9 }} /> 添加
+                            <PlusOutlined style={{ fontSize: 15 }} /> 添加
                           </button>
                         </div>
                         {(editForm.models || []).map((model: ProviderModel, idx: number) => (
@@ -1002,41 +1002,41 @@ export default function ManagePage() {
                             border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)'
                           }}>
                             {editingModelIndex === idx ? (
-                              <div style={{ fontSize: 11 }}>
+                              <div style={{ fontSize: 14 }}>
                                 <div style={{ marginBottom: 4 }}>
-                                  <div style={{ color: 'var(--text-tertiary)', fontSize: 10, marginBottom: 2 }}>模型 ID *</div>
+                                  <div style={{ color: 'var(--text-tertiary)', fontSize: 16, marginBottom: 2 }}>模型 ID *</div>
                                   <Input size="small" placeholder="gpt-4o" value={model.id}
                                     onChange={e => handleUpdateModel(idx, 'id', e.target.value)}
-                                    style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 10 }} />
+                                    style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 16 }} />
                                 </div>
                                 <div style={{ marginBottom: 4 }}>
-                                  <div style={{ color: 'var(--text-tertiary)', fontSize: 10, marginBottom: 2 }}>显示名称</div>
+                                  <div style={{ color: 'var(--text-tertiary)', fontSize: 16, marginBottom: 2 }}>显示名称</div>
                                   <Input size="small" placeholder="GPT-4o" value={model.name}
                                     onChange={e => handleUpdateModel(idx, 'name', e.target.value)}
-                                    style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 10 }} />
+                                    style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 16 }} />
                                 </div>
                                 <Row gutter={4}>
                                   <Col span={12}>
-                                    <div style={{ color: 'var(--text-tertiary)', fontSize: 10, marginBottom: 2 }}>上下文窗口</div>
+                                    <div style={{ color: 'var(--text-tertiary)', fontSize: 16, marginBottom: 2 }}>上下文窗口</div>
                                     <Input size="small" type="number" value={model.contextWindow}
                                       onChange={e => handleUpdateModel(idx, 'contextWindow', parseInt(e.target.value) || 0)}
-                                      style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 10 }} />
+                                      style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 16 }} />
                                   </Col>
                                   <Col span={12}>
-                                    <div style={{ color: 'var(--text-tertiary)', fontSize: 10, marginBottom: 2 }}>最大输出</div>
+                                    <div style={{ color: 'var(--text-tertiary)', fontSize: 16, marginBottom: 2 }}>最大输出</div>
                                     <Input size="small" type="number" value={model.maxTokens}
                                       onChange={e => handleUpdateModel(idx, 'maxTokens', parseInt(e.target.value) || 0)}
-                                      style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 10 }} />
+                                      style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 16 }} />
                                   </Col>
                                 </Row>
                                 <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
                                   <Switch size="small" checked={model.reasoning}
                                     onChange={checked => handleUpdateModel(idx, 'reasoning', checked)} />
-                                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>支持推理</span>
+                                  <span style={{ fontSize: 16, color: 'var(--text-tertiary)' }}>支持推理</span>
                                 </div>
                                 <div style={{ marginTop: 6, display: 'flex', gap: 4 }}>
                                   <button onClick={() => setEditingModelIndex(null)}
-                                    style={{ flex: 1, background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', padding: '2px 0', cursor: 'pointer', fontSize: 10 }}>
+                                    style={{ flex: 1, background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', padding: '2px 0', cursor: 'pointer', fontSize: 16 }}>
                                     完成
                                   </button>
                                 </div>
@@ -1044,8 +1044,8 @@ export default function ManagePage() {
                             ) : (
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <div style={{ flex: 1 }}>
-                                  <div style={{ fontSize: 11, color: 'var(--text-primary)', marginBottom: 2 }}>{model.name || model.id || '(未命名)'}</div>
-                                  <div style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>
+                                  <div style={{ fontSize: 14, color: 'var(--text-primary)', marginBottom: 2 }}>{model.name || model.id || '(未命名)'}</div>
+                                  <div style={{ fontSize: 15, color: 'var(--text-tertiary)' }}>
                                     {model.id} · {model.contextWindow}ctx · {model.maxTokens}out
                                     {model.reasoning && <span style={{ marginLeft: 4, color: 'var(--figma-blue)' }}>推理</span>}
                                   </div>
@@ -1053,11 +1053,11 @@ export default function ManagePage() {
                                 <div style={{ display: 'flex', gap: 4 }}>
                                   <button onClick={() => setEditingModelIndex(idx)}
                                     style={{ background: 'none', border: 'none', color: 'var(--figma-blue)', cursor: 'pointer', padding: 2 }}>
-                                    <EditOutlined style={{ fontSize: 11 }} />
+                                    <EditOutlined style={{ fontSize: 14 }} />
                                   </button>
                                   <button onClick={() => handleDeleteModel(idx)}
                                     style={{ background: 'none', border: 'none', color: 'var(--figma-red)', cursor: 'pointer', padding: 2 }}>
-                                    <DeleteOutlined style={{ fontSize: 11 }} />
+                                    <DeleteOutlined style={{ fontSize: 14 }} />
                                   </button>
                                 </div>
                               </div>
@@ -1067,8 +1067,8 @@ export default function ManagePage() {
                       </div>
 
                       <div style={{ display: 'flex', gap: 6 }}>
-                        <button onClick={() => { setEditingProvider(null); setEditingModelIndex(null); }} style={{ flex: 1, background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', padding: '3px 0', cursor: 'pointer', fontSize: 11 }}>取消</button>
-                        <button onClick={() => handleSaveProvider(provider.name)} style={{ flex: 1, background: 'var(--figma-blue)', border: 'none', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', padding: '3px 0', cursor: 'pointer', fontSize: 11 }}>保存</button>
+                        <button onClick={() => { setEditingProvider(null); setEditingModelIndex(null); }} style={{ flex: 1, background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', padding: '3px 0', cursor: 'pointer', fontSize: 14 }}>取消</button>
+                        <button onClick={() => handleSaveProvider(provider.name)} style={{ flex: 1, background: 'var(--figma-blue)', border: 'none', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', padding: '3px 0', cursor: 'pointer', fontSize: 14 }}>保存</button>
                       </div>
                     </div>
                   ) : (
@@ -1079,20 +1079,20 @@ export default function ManagePage() {
                           {provider.hasApiKey ? 'Key ✓' : 'No Key'}
                         </span>
                       </div>
-                      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 8 }}>
+                      <div style={{ fontSize: 14, color: 'var(--text-tertiary)', marginBottom: 8 }}>
                         {provider.models.length} 个模型 · {provider.hasApiKey ? 'Key 已配置' : '未配置 Key'}
                       </div>
                       <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 8 }}>
-                        <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>模型 ({provider.models.length})</div>
+                        <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>模型 ({provider.models.length})</div>
                         {provider.models.map((m, i) => (
                           <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 0' }}>
-                            <span style={{ fontSize: 12, color: 'var(--text-primary)' }}>{m.name || m.id}</span>
+                            <span style={{ fontSize: 15, color: 'var(--text-primary)' }}>{m.name || m.id}</span>
                             <button
                               onClick={() => handleSetDefault(`${provider.name}/${m.id}`)}
                               style={{
                                 background: defaultModel.primary === `${provider.name}/${m.id}` ? 'var(--figma-blue)' : 'none',
                                 border: `1px solid ${defaultModel.primary === `${provider.name}/${m.id}` ? 'var(--figma-blue)' : 'var(--border-subtle)'}`,
-                                borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 10, padding: '1px 6px', cursor: 'pointer'
+                                borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 16, padding: '1px 6px', cursor: 'pointer'
                               }}
                             >
                               {defaultModel.primary === `${provider.name}/${m.id}` ? '默认 ✓' : '设为默认'}
@@ -1125,7 +1125,7 @@ export default function ManagePage() {
         </div>
         <div className="figma-panel-body">
           {Object.keys(agentModels).length === 0 ? (
-            <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 30, fontSize: 12 }}>
+            <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 30, fontSize: 15 }}>
               暂无 Agent 配置
             </div>
           ) : (
@@ -1135,19 +1135,19 @@ export default function ManagePage() {
                 return (
                   <Col span={8} key={agentName}>
                     <div className="figma-card" style={{ padding: 'var(--space-3)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{getAgentDisplayName(agentName)}</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                        <span style={{ fontSize: 19, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: 0.2 }}>{getAgentDisplayName(agentName)}</span>
                         <button onClick={() => handleEditAgentModel(agentName)} style={{ background: 'none', border: 'none', color: 'var(--figma-blue)', cursor: 'pointer', padding: 2 }}>
-                          <EditOutlined style={{ fontSize: 13 }} />
+                          <EditOutlined style={{ fontSize: 18 }} />
                         </button>
                       </div>
 
                       {editingAgent === agentName ? (
-                        <div style={{ fontSize: 12 }}>
-                          <div style={{ marginBottom: 6 }}>
-                            <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 11 }}>主模型</div>
+                        <div style={{ fontSize: 16 }}>
+                          <div style={{ marginBottom: 8 }}>
+                            <div style={{ color: 'var(--text-secondary)', marginBottom: 4, fontSize: 15 }}>主模型</div>
                             <select value={agentEditForm.model} onChange={e => setAgentEditForm({ ...agentEditForm, model: e.target.value })}
-                              style={{ width: '100%', padding: '3px 6px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 11 }}>
+                              style={{ width: '100%', padding: '5px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }}>
                               <option value="">选择模型...</option>
                               {allModels.map(m => (
                                 <option key={m.label} value={m.label}>{m.label}</option>
@@ -1155,50 +1155,50 @@ export default function ManagePage() {
                             </select>
                           </div>
 
-                          <div style={{ marginBottom: 8 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                              <span style={{ color: 'var(--text-secondary)', fontSize: 11 }}>备用模型</span>
+                          <div style={{ marginBottom: 10 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                              <span style={{ color: 'var(--text-secondary)', fontSize: 15 }}>备用模型</span>
                               <button onClick={handleAddFallbackModel} style={{
                                 background: 'none', border: '1px solid var(--figma-blue)', borderRadius: 'var(--radius-sm)',
-                                color: 'var(--figma-blue)', fontSize: 10, padding: '1px 6px', cursor: 'pointer'
+                                color: 'var(--figma-blue)', fontSize: 14, padding: '2px 8px', cursor: 'pointer'
                               }}>
-                                <PlusOutlined style={{ fontSize: 9 }} /> 添加
+                                <PlusOutlined style={{ fontSize: 16 }} /> 添加
                               </button>
                             </div>
                             {(agentEditForm.fallbackModels || []).map((fb: string, idx: number) => (
-                              <div key={idx} style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+                              <div key={idx} style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
                                 <select value={fb} onChange={e => handleUpdateFallbackModel(idx, e.target.value)}
-                                  style={{ flex: 1, padding: '2px 4px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 11 }}>
+                                  style={{ flex: 1, padding: '4px 6px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }}>
                                   <option value="">选择备用模型...</option>
                                   {allModels.map(m => (
                                     <option key={m.label} value={m.label}>{m.label}</option>
                                   ))}
                                 </select>
                                 <button onClick={() => handleRemoveFallbackModel(idx)} style={{ background: 'none', border: 'none', color: 'var(--figma-red)', cursor: 'pointer', padding: 2 }}>
-                                  <DeleteOutlined style={{ fontSize: 11 }} />
+                                  <DeleteOutlined style={{ fontSize: 16 }} />
                                 </button>
                               </div>
                             ))}
                           </div>
 
                           <div style={{ display: 'flex', gap: 6 }}>
-                            <button onClick={() => setEditingAgent(null)} style={{ flex: 1, background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', padding: '3px 0', cursor: 'pointer', fontSize: 11 }}>取消</button>
-                            <button onClick={handleSaveAgentModel} style={{ flex: 1, background: 'var(--figma-blue)', border: 'none', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', padding: '3px 0', cursor: 'pointer', fontSize: 11 }}>保存</button>
+                            <button onClick={() => setEditingAgent(null)} style={{ flex: 1, background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', padding: '5px 0', cursor: 'pointer', fontSize: 15 }}>取消</button>
+                            <button onClick={handleSaveAgentModel} style={{ flex: 1, background: 'var(--figma-blue)', border: 'none', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', padding: '5px 0', cursor: 'pointer', fontSize: 15 }}>保存</button>
                           </div>
                         </div>
                       ) : (
                         <>
-                          <div style={{ marginBottom: 8 }}>
-                            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>主模型</div>
-                            <div style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 500 }}>
+                          <div style={{ marginBottom: 10 }}>
+                            <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 4 }}>主模型</div>
+                            <div style={{ fontSize: 17, color: 'var(--text-primary)', fontWeight: 600 }}>
                               {config.model || '未配置'}
                             </div>
                           </div>
                           {config.fallbackModels && config.fallbackModels.length > 0 && (
                             <div>
-                              <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>备用模型</div>
+                              <div style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 4 }}>备用模型</div>
                               {config.fallbackModels.map((fb: string, idx: number) => (
-                                <div key={idx} style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 2 }}>
+                                <div key={idx} style={{ fontSize: 16, color: 'var(--text-tertiary)', marginBottom: 3 }}>
                                   {idx + 1}. {fb}
                                 </div>
                               ))}
@@ -1229,9 +1229,9 @@ export default function ManagePage() {
                 <span className="figma-badge figma-badge-blue">{cronJobs.length} 个</span>
                 <button onClick={() => setShowAddCron(!showAddCron)} style={{
                   background: 'none', border: '1px solid var(--figma-blue)', borderRadius: 'var(--radius-sm)',
-                  color: 'var(--figma-blue)', fontSize: 11, padding: '2px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4
+                  color: 'var(--figma-blue)', fontSize: 14, padding: '2px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4
                 }}>
-                  <PlusOutlined style={{ fontSize: 10 }} /> 添加
+                  <PlusOutlined style={{ fontSize: 16 }} /> 添加
                 </button>
               </div>
             </div>
@@ -1242,26 +1242,26 @@ export default function ManagePage() {
                   background: 'var(--bg-tertiary)', border: '1px solid var(--figma-blue)',
                   borderRadius: 'var(--radius-sm)', animation: 'slideIn 0.2s ease'
                 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>新建定时任务</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>新建定时任务</div>
                   <div style={{ marginBottom: 6 }}>
-                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>任务名称</div>
+                    <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 2 }}>任务名称</div>
                     <Input size="small" placeholder="每日邮件检查" value={newCron.name}
                       onChange={e => setNewCron({ ...newCron, name: e.target.value })}
                       style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} />
                   </div>
                   <div style={{ marginBottom: 6 }}>
-                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>执行频率</div>
+                    <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 2 }}>执行频率</div>
                     <select value={newCron.scheduleType} onChange={e => setNewCron({ ...newCron, scheduleType: e.target.value })}
-                      style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12, marginBottom: 6 }}>
+                      style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15, marginBottom: 6 }}>
                       <option value="every">每隔一段时间</option>
                       <option value="daily">每天定时</option>
                       <option value="weekly">每周定时</option>
                     </select>
                     {newCron.scheduleType === 'every' && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>每隔</span>
+                        <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>每隔</span>
                         <select value={newCron.intervalMinutes} onChange={e => setNewCron({ ...newCron, intervalMinutes: e.target.value })}
-                          style={{ padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12 }}>
+                          style={{ padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }}>
                           <option value="5">5 分钟</option>
                           <option value="10">10 分钟</option>
                           <option value="15">15 分钟</option>
@@ -1272,22 +1272,22 @@ export default function ManagePage() {
                           <option value="720">12 小时</option>
                           <option value="1440">24 小时</option>
                         </select>
-                        <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>执行一次</span>
+                        <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>执行一次</span>
                       </div>
                     )}
                     {newCron.scheduleType === 'daily' && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>每天</span>
+                        <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>每天</span>
                         <input type="time" value={newCron.dailyTime} onChange={e => setNewCron({ ...newCron, dailyTime: e.target.value })}
-                          style={{ padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12 }} />
-                        <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>执行</span>
+                          style={{ padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }} />
+                        <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>执行</span>
                       </div>
                     )}
                     {newCron.scheduleType === 'weekly' && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>每周</span>
+                        <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>每周</span>
                         <select value={newCron.weekDay} onChange={e => setNewCron({ ...newCron, weekDay: e.target.value })}
-                          style={{ padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12 }}>
+                          style={{ padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }}>
                           <option value="1">一</option>
                           <option value="2">二</option>
                           <option value="3">三</option>
@@ -1297,30 +1297,30 @@ export default function ManagePage() {
                           <option value="0">日</option>
                         </select>
                         <input type="time" value={newCron.weekTime} onChange={e => setNewCron({ ...newCron, weekTime: e.target.value })}
-                          style={{ padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12 }} />
-                        <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>执行</span>
+                          style={{ padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }} />
+                        <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>执行</span>
                       </div>
                     )}
                   </div>
                   <div style={{ marginBottom: 6 }}>
-                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>任务描述（告诉 AI 做什么）</div>
+                    <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 2 }}>任务描述（告诉 AI 做什么）</div>
                     <Input.TextArea rows={2} placeholder="检查未读邮件，如果有重要邮件就通知我" value={newCron.message}
                       onChange={e => setNewCron({ ...newCron, message: e.target.value })}
-                      style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 12 }} />
+                      style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 15 }} />
                   </div>
                   <div style={{ marginBottom: 8 }}>
-                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>运行环境</div>
+                    <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 2 }}>运行环境</div>
                     <select value={newCron.sessionTarget} onChange={e => setNewCron({ ...newCron, sessionTarget: e.target.value })}
-                      style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12 }}>
+                      style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }}>
                       <option value="isolated">隔离会话 (推荐)</option>
                       <option value="main">主会话</option>
                     </select>
                   </div>
                   {newCron.sessionTarget === 'isolated' && (
                     <div style={{ marginBottom: 8 }}>
-                      <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>结果发送到</div>
+                      <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 2 }}>结果发送到</div>
                       <select value={newCron.deliveryChannel} onChange={e => setNewCron({ ...newCron, deliveryChannel: e.target.value })}
-                        style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12 }}>
+                        style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }}>
                         <option value="auto">自动（最近使用的渠道）</option>
                         <option value="telegram">Telegram</option>
                         <option value="whatsapp">WhatsApp</option>
@@ -1330,18 +1330,18 @@ export default function ManagePage() {
                     </div>
                   )}
                   <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                    <button onClick={() => setShowAddCron(false)} style={{ background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', padding: '4px 12px', cursor: 'pointer', fontSize: 12 }}>取消</button>
-                    <button onClick={handleAddCron} style={{ background: 'var(--figma-blue)', border: 'none', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', padding: '4px 12px', cursor: 'pointer', fontSize: 12 }}>创建</button>
+                    <button onClick={() => setShowAddCron(false)} style={{ background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', padding: '4px 12px', cursor: 'pointer', fontSize: 15 }}>取消</button>
+                    <button onClick={handleAddCron} style={{ background: 'var(--figma-blue)', border: 'none', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', padding: '4px 12px', cursor: 'pointer', fontSize: 15 }}>创建</button>
                   </div>
                 </div>
               )}
 
               {cronLoading && !showAddCron ? (
-                <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 30, fontSize: 12 }}>
+                <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 30, fontSize: 15 }}>
                   任务加载中...
                 </div>
               ) : cronJobs.length === 0 && !showAddCron ? (
-                <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 30, fontSize: 12 }}>
+                <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 30, fontSize: 15 }}>
                   暂无定时任务，点击"添加"创建
                 </div>
               ) : cronJobs.map((job) => (
@@ -1352,72 +1352,72 @@ export default function ManagePage() {
                 }}>
                   {editingCronId === job.id ? (
                     <div>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>编辑任务</div>
+                      <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>编辑任务</div>
                       <div style={{ marginBottom: 6 }}>
-                        <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>任务名称</div>
+                        <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 2 }}>任务名称</div>
                         <Input size="small" value={editCron.name} onChange={e => setEditCron({ ...editCron, name: e.target.value })}
                           style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} />
                       </div>
                       <div style={{ marginBottom: 6 }}>
-                        <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>执行频率</div>
+                        <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 2 }}>执行频率</div>
                         <select value={editCron.scheduleType} onChange={e => setEditCron({ ...editCron, scheduleType: e.target.value })}
-                          style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12, marginBottom: 6 }}>
+                          style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15, marginBottom: 6 }}>
                           <option value="every">每隔一段时间</option>
                           <option value="daily">每天定时</option>
                           <option value="weekly">每周定时</option>
                         </select>
                         {editCron.scheduleType === 'every' && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>每隔</span>
+                            <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>每隔</span>
                             <select value={editCron.intervalMinutes} onChange={e => setEditCron({ ...editCron, intervalMinutes: e.target.value })}
-                              style={{ padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12 }}>
+                              style={{ padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }}>
                               <option value="5">5 分钟</option><option value="10">10 分钟</option><option value="15">15 分钟</option>
                               <option value="30">30 分钟</option><option value="60">1 小时</option><option value="120">2 小时</option>
                               <option value="360">6 小时</option><option value="720">12 小时</option><option value="1440">24 小时</option>
                             </select>
-                            <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>执行一次</span>
+                            <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>执行一次</span>
                           </div>
                         )}
                         {editCron.scheduleType === 'daily' && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>每天</span>
+                            <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>每天</span>
                             <input type="time" value={editCron.dailyTime} onChange={e => setEditCron({ ...editCron, dailyTime: e.target.value })}
-                              style={{ padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12 }} />
-                            <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>执行</span>
+                              style={{ padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }} />
+                            <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>执行</span>
                           </div>
                         )}
                         {editCron.scheduleType === 'weekly' && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>每周</span>
+                            <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>每周</span>
                             <select value={editCron.weekDay} onChange={e => setEditCron({ ...editCron, weekDay: e.target.value })}
-                              style={{ padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12 }}>
+                              style={{ padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }}>
                               <option value="1">一</option><option value="2">二</option><option value="3">三</option>
                               <option value="4">四</option><option value="5">五</option><option value="6">六</option><option value="0">日</option>
                             </select>
                             <input type="time" value={editCron.weekTime} onChange={e => setEditCron({ ...editCron, weekTime: e.target.value })}
-                              style={{ padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12 }} />
-                            <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>执行</span>
+                              style={{ padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }} />
+                            <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>执行</span>
                           </div>
                         )}
                       </div>
                       <div style={{ marginBottom: 6 }}>
-                        <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>任务描述（告诉 AI 做什么）</div>
+                        <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 2 }}>任务描述（告诉 AI 做什么）</div>
                         <Input.TextArea rows={2} value={editCron.message} onChange={e => setEditCron({ ...editCron, message: e.target.value })}
-                          style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 12 }} />
+                          style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 15 }} />
                       </div>
                       <div style={{ marginBottom: 8 }}>
-                        <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>运行环境</div>
+                        <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 2 }}>运行环境</div>
                         <select value={editCron.sessionTarget} onChange={e => setEditCron({ ...editCron, sessionTarget: e.target.value })}
-                          style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12 }}>
+                          style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }}>
                           <option value="isolated">隔离会话 (推荐)</option>
                           <option value="main">主会话</option>
                         </select>
                       </div>
                       {editCron.sessionTarget === 'isolated' && (
                         <div style={{ marginBottom: 8 }}>
-                          <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 2 }}>结果发送到</div>
+                          <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 2 }}>结果发送到</div>
                           <select value={editCron.deliveryChannel} onChange={e => setEditCron({ ...editCron, deliveryChannel: e.target.value })}
-                            style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12 }}>
+                            style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }}>
                             <option value="auto">自动（最近使用的渠道）</option>
                             <option value="telegram">Telegram</option>
                             <option value="whatsapp">WhatsApp</option>
@@ -1427,19 +1427,19 @@ export default function ManagePage() {
                         </div>
                       )}
                       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                        <button onClick={() => setEditingCronId(null)} style={{ background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', padding: '4px 12px', cursor: 'pointer', fontSize: 12 }}>取消</button>
-                        <button onClick={handleSaveEditCron} style={{ background: 'var(--figma-blue)', border: 'none', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', padding: '4px 12px', cursor: 'pointer', fontSize: 12 }}>保存</button>
+                        <button onClick={() => setEditingCronId(null)} style={{ background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', padding: '4px 12px', cursor: 'pointer', fontSize: 15 }}>取消</button>
+                        <button onClick={handleSaveEditCron} style={{ background: 'var(--figma-blue)', border: 'none', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', padding: '4px 12px', cursor: 'pointer', fontSize: 15 }}>保存</button>
                       </div>
                     </div>
                   ) : (
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <Switch size="small" checked={job.enabled} onChange={() => handleToggleCron(job)} />
-                        <span style={{ fontSize: 13, fontWeight: 600, color: job.enabled ? 'var(--text-primary)' : 'var(--text-tertiary)' }}>{job.name}</span>
+                        <span style={{ fontSize: 16, fontWeight: 600, color: job.enabled ? 'var(--text-primary)' : 'var(--text-tertiary)' }}>{job.name}</span>
                         {!job.enabled && (
-                          <span className="figma-badge figma-badge-gray" style={{ fontSize: 9 }}>已停用</span>
+                          <span className="figma-badge figma-badge-gray" style={{ fontSize: 15 }}>已停用</span>
                         )}
-                        <span className="figma-badge figma-badge-blue" style={{ fontSize: 10 }}>{(() => {
+                        <span className="figma-badge figma-badge-blue" style={{ fontSize: 16 }}>{(() => {
                           const s = job.schedule;
                           if (!s) return '?';
                           if (s.kind === 'every' && s.everyMs) {
@@ -1464,10 +1464,10 @@ export default function ManagePage() {
                       </div>
                       <div style={{ display: 'flex', gap: 6 }}>
                         <button onClick={() => handleStartEditCron(job)} style={{ background: 'none', border: 'none', color: 'var(--figma-blue)', cursor: 'pointer', padding: 2 }}>
-                          <EditOutlined style={{ fontSize: 12 }} />
+                          <EditOutlined style={{ fontSize: 15 }} />
                         </button>
                         <button onClick={() => handleDeleteCron(job.id)} style={{ background: 'none', border: 'none', color: 'var(--figma-red)', cursor: 'pointer', padding: 2 }}>
-                          <DeleteOutlined style={{ fontSize: 12 }} />
+                          <DeleteOutlined style={{ fontSize: 15 }} />
                         </button>
                       </div>
                     </div>
@@ -1492,9 +1492,9 @@ export default function ManagePage() {
             <span className="figma-badge figma-badge-green">{channels.filter(c => c.enabled).length} 启用</span>
             <button onClick={() => setShowAddChannel(!showAddChannel)} style={{
               background: 'none', border: '1px solid var(--figma-blue)', borderRadius: 'var(--radius-sm)',
-              color: 'var(--figma-blue)', fontSize: 11, padding: '2px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4
+              color: 'var(--figma-blue)', fontSize: 14, padding: '2px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4
             }}>
-              <PlusOutlined style={{ fontSize: 10 }} /> 添加
+              <PlusOutlined style={{ fontSize: 16 }} /> 添加
             </button>
           </div>
         </div>
@@ -1506,18 +1506,18 @@ export default function ManagePage() {
               background: 'var(--bg-tertiary)', border: '1px solid var(--figma-blue)',
               borderRadius: 'var(--radius-sm)', animation: 'slideIn 0.2s ease'
             }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 12 }}>添加新 Channel</div>
+              <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 12 }}>添加新 Channel</div>
               <Row gutter={[12, 8]}>
                 <Col span={6}>
-                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>名称 *</div>
+                  <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>名称 *</div>
                   <Input size="small" placeholder="telegram" value={newChannel.name}
                     onChange={e => setNewChannel({ ...newChannel, name: e.target.value })}
                     style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} />
                 </Col>
                 <Col span={6}>
-                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>类型</div>
+                  <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>类型</div>
                   <select value={newChannel.type} onChange={e => setNewChannel({ ...newChannel, type: e.target.value })}
-                    style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12 }}>
+                    style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }}>
                     {CHANNEL_TYPES.map(t => (
                       <option key={t.value} value={t.value}>{t.icon} {t.label}</option>
                     ))}
@@ -1527,7 +1527,7 @@ export default function ManagePage() {
                 {/* 根据类型显示不同的配置字段 */}
                 {(newChannel.type === 'telegram' || newChannel.type === 'discord') && (
                   <Col span={12}>
-                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Bot Token *</div>
+                    <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>Bot Token *</div>
                     <Input.Password size="small" placeholder="输入 Bot Token..." value={newChannel.botToken}
                       onChange={e => setNewChannel({ ...newChannel, botToken: e.target.value })}
                       style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} />
@@ -1536,7 +1536,7 @@ export default function ManagePage() {
                 
                 {newChannel.type === 'whatsapp' && (
                   <Col span={12}>
-                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>配置方式</div>
+                    <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>配置方式</div>
                     <button
                       onClick={handleStartWhatsAppAuth}
                       style={{
@@ -1547,7 +1547,7 @@ export default function ManagePage() {
                         color: 'var(--text-primary)',
                         padding: '8px 12px',
                         cursor: 'pointer',
-                        fontSize: 12,
+                        fontSize: 15,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -1556,7 +1556,7 @@ export default function ManagePage() {
                     >
                       📱 生成扫码二维码
                     </button>
-                    <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 6, textAlign: 'center' }}>
+                    <div style={{ fontSize: 16, color: 'var(--text-tertiary)', marginTop: 6, textAlign: 'center' }}>
                       使用 wacli 扫码连接（无需 Token）
                     </div>
                   </Col>
@@ -1564,7 +1564,7 @@ export default function ManagePage() {
                 
                 {newChannel.type === 'signal' && (
                   <Col span={12}>
-                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Phone Number *</div>
+                    <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>Phone Number *</div>
                     <Input size="small" placeholder="+1234567890" value={newChannel.botToken}
                       onChange={e => setNewChannel({ ...newChannel, botToken: e.target.value })}
                       style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} />
@@ -1573,7 +1573,7 @@ export default function ManagePage() {
                 
                 {newChannel.type === 'slack' && (
                   <Col span={12}>
-                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Bot Token *</div>
+                    <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>Bot Token *</div>
                     <Input.Password size="small" placeholder="xoxb-..." value={newChannel.botToken}
                       onChange={e => setNewChannel({ ...newChannel, botToken: e.target.value })}
                       style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} />
@@ -1583,13 +1583,13 @@ export default function ManagePage() {
                 {newChannel.type === 'irc' && (
                   <>
                     <Col span={6}>
-                      <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Server *</div>
+                      <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>Server *</div>
                       <Input size="small" placeholder="irc.libera.chat" value={newChannel.botToken}
                         onChange={e => setNewChannel({ ...newChannel, botToken: e.target.value })}
                         style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} />
                     </Col>
                     <Col span={6}>
-                      <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Port</div>
+                      <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>Port</div>
                       <Input size="small" type="number" placeholder="6667" defaultValue="6667"
                         style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} />
                     </Col>
@@ -1601,12 +1601,12 @@ export default function ManagePage() {
               {newChannel.type === 'irc' && (
                 <Row gutter={[12, 8]} style={{ marginTop: 8 }}>
                   <Col span={12}>
-                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Nickname *</div>
+                    <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>Nickname *</div>
                     <Input size="small" placeholder="openclaw-bot"
                       style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} />
                   </Col>
                   <Col span={12}>
-                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Channels (逗号分隔)</div>
+                    <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>Channels (逗号分隔)</div>
                     <Input size="small" placeholder="#general, #dev"
                       style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} />
                   </Col>
@@ -1617,12 +1617,12 @@ export default function ManagePage() {
               {newChannel.type === 'discord' && (
                 <Row gutter={[12, 8]} style={{ marginTop: 8 }}>
                   <Col span={12}>
-                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Guild ID (可选)</div>
+                    <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>Guild ID (可选)</div>
                     <Input size="small" placeholder="123456789012345678"
                       style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} />
                   </Col>
                   <Col span={12}>
-                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Webhook URL (可选)</div>
+                    <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>Webhook URL (可选)</div>
                     <Input size="small" placeholder="https://discord.com/api/webhooks/..."
                       style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} />
                   </Col>
@@ -1631,27 +1631,27 @@ export default function ManagePage() {
               
               <Row gutter={[12, 8]} style={{ marginTop: 8 }}>
                 <Col span={8}>
-                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>DM 策略</div>
+                  <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>DM 策略</div>
                   <select value={newChannel.dmPolicy} onChange={e => setNewChannel({ ...newChannel, dmPolicy: e.target.value })}
-                    style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12 }}>
+                    style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }}>
                     <option value="pairing">Pairing</option>
                     <option value="allowlist">Allowlist</option>
                     <option value="open">Open</option>
                   </select>
                 </Col>
                 <Col span={8}>
-                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>群组策略</div>
+                  <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>群组策略</div>
                   <select value={newChannel.groupPolicy} onChange={e => setNewChannel({ ...newChannel, groupPolicy: e.target.value })}
-                    style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12 }}>
+                    style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }}>
                     <option value="allowlist">Allowlist</option>
                     <option value="open">Open</option>
                     <option value="deny">Deny</option>
                   </select>
                 </Col>
                 <Col span={8}>
-                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>流式模式</div>
+                  <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>流式模式</div>
                   <select value={newChannel.streamMode} onChange={e => setNewChannel({ ...newChannel, streamMode: e.target.value })}
-                    style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 12 }}>
+                    style={{ width: '100%', padding: '4px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }}>
                     <option value="partial">Partial</option>
                     <option value="full">Full</option>
                     <option value="none">None</option>
@@ -1659,14 +1659,14 @@ export default function ManagePage() {
                 </Col>
               </Row>
               <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                <button onClick={() => setShowAddChannel(false)} style={{ background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', padding: '4px 12px', cursor: 'pointer', fontSize: 12 }}>取消</button>
-                <button onClick={handleAddChannel} style={{ background: 'var(--figma-blue)', border: 'none', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', padding: '4px 12px', cursor: 'pointer', fontSize: 12 }}>确认添加</button>
+                <button onClick={() => setShowAddChannel(false)} style={{ background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', padding: '4px 12px', cursor: 'pointer', fontSize: 15 }}>取消</button>
+                <button onClick={handleAddChannel} style={{ background: 'var(--figma-blue)', border: 'none', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', padding: '4px 12px', cursor: 'pointer', fontSize: 15 }}>确认添加</button>
               </div>
             </div>
           )}
 
           {channels.length === 0 && !showAddChannel ? (
-            <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 40, fontSize: 12 }}>
+            <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 40, fontSize: 15 }}>
               暂无 Channel 配置，点击"添加"创建
             </div>
           ) : (
@@ -1683,26 +1683,26 @@ export default function ManagePage() {
                         </div>
                         <div style={{ display: 'flex', gap: 4 }}>
                           <button onClick={() => handleEditChannel(channel)} style={{ background: 'none', border: 'none', color: 'var(--figma-blue)', cursor: 'pointer', padding: 2 }}>
-                            <EditOutlined style={{ fontSize: 13 }} />
+                            <EditOutlined style={{ fontSize: 16 }} />
                           </button>
                           <button onClick={() => handleDeleteChannel(channel.name)} style={{ background: 'none', border: 'none', color: 'var(--figma-red)', cursor: 'pointer', padding: 2 }}>
-                            <DeleteOutlined style={{ fontSize: 13 }} />
+                            <DeleteOutlined style={{ fontSize: 16 }} />
                           </button>
                         </div>
                       </div>
 
                       {editingChannel === channel.name ? (
-                        <div style={{ fontSize: 12 }}>
+                        <div style={{ fontSize: 15 }}>
                           <div style={{ marginBottom: 6 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                               <Switch size="small" checked={channelEditForm.enabled}
                                 onChange={checked => setChannelEditForm({ ...channelEditForm, enabled: checked })} />
-                              <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>启用</span>
+                              <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>启用</span>
                             </div>
                           </div>
 
                           <div style={{ marginBottom: 6 }}>
-                            <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 11 }}>
+                            <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 14 }}>
                               {channel.type === 'telegram' && 'Bot Token (留空保持不变)'}
                               {channel.type === 'discord' && 'Bot Token (留空保持不变)'}
                               {channel.type === 'whatsapp' && 'API Token / 使用 wacli 扫码 (留空保持不变)'}
@@ -1722,7 +1722,7 @@ export default function ManagePage() {
                                     color: 'var(--text-primary)',
                                     padding: '6px 10px',
                                     cursor: 'pointer',
-                                    fontSize: 11,
+                                    fontSize: 14,
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
@@ -1731,7 +1731,7 @@ export default function ManagePage() {
                                 >
                                   📱 打开扫码窗口
                                 </button>
-                                <div style={{ fontSize: 9, color: 'var(--text-tertiary)', marginTop: 4, textAlign: 'center' }}>
+                                <div style={{ fontSize: 15, color: 'var(--text-tertiary)', marginTop: 4, textAlign: 'center' }}>
                                   使用 wacli 扫码连接（无需 Token）
                                 </div>
                               </div>
@@ -1747,7 +1747,7 @@ export default function ManagePage() {
                                   }
                                 }}
                                 placeholder="留空保持原值"
-                                style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 11 }} />
+                                style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 14 }} />
                             )}
                           </div>
                           
@@ -1755,18 +1755,18 @@ export default function ManagePage() {
                           {channel.type === 'irc' && (
                             <>
                               <div style={{ marginBottom: 6 }}>
-                                <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 11 }}>Nickname</div>
+                                <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 14 }}>Nickname</div>
                                 <Input size="small" value={channelEditForm.nickname || ''}
                                   onChange={e => setChannelEditForm({ ...channelEditForm, nickname: e.target.value })}
                                   placeholder="openclaw-bot"
-                                  style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 11 }} />
+                                  style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 14 }} />
                               </div>
                               <div style={{ marginBottom: 6 }}>
-                                <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 11 }}>Channels (逗号分隔)</div>
+                                <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 14 }}>Channels (逗号分隔)</div>
                                 <Input size="small" value={channelEditForm.channels || ''}
                                   onChange={e => setChannelEditForm({ ...channelEditForm, channels: e.target.value })}
                                   placeholder="#general, #dev"
-                                  style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 11 }} />
+                                  style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 14 }} />
                               </div>
                             </>
                           )}
@@ -1775,36 +1775,36 @@ export default function ManagePage() {
                           {channel.type === 'discord' && (
                             <>
                               <div style={{ marginBottom: 6 }}>
-                                <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 11 }}>Guild ID (可选)</div>
+                                <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 14 }}>Guild ID (可选)</div>
                                 <Input size="small" value={channelEditForm.guildId || ''}
                                   onChange={e => setChannelEditForm({ ...channelEditForm, guildId: e.target.value })}
                                   placeholder="123456789012345678"
-                                  style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 11 }} />
+                                  style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 14 }} />
                               </div>
                               <div style={{ marginBottom: 6 }}>
-                                <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 11 }}>Webhook URL (可选)</div>
+                                <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 14 }}>Webhook URL (可选)</div>
                                 <Input size="small" value={channelEditForm.webhook || ''}
                                   onChange={e => setChannelEditForm({ ...channelEditForm, webhook: e.target.value })}
                                   placeholder="https://discord.com/api/webhooks/..."
-                                  style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 11 }} />
+                                  style={{ background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)', fontSize: 14 }} />
                               </div>
                             </>
                           )}
 
                           <Row gutter={4} style={{ marginBottom: 6 }}>
                             <Col span={12}>
-                              <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 10 }}>DM 策略</div>
+                              <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 16 }}>DM 策略</div>
                               <select value={channelEditForm.dmPolicy} onChange={e => setChannelEditForm({ ...channelEditForm, dmPolicy: e.target.value })}
-                                style={{ width: '100%', padding: '2px 4px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 11 }}>
+                                style={{ width: '100%', padding: '2px 4px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 14 }}>
                                 <option value="pairing">Pairing</option>
                                 <option value="allowlist">Allowlist</option>
                                 <option value="open">Open</option>
                               </select>
                             </Col>
                             <Col span={12}>
-                              <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 10 }}>群组策略</div>
+                              <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 16 }}>群组策略</div>
                               <select value={channelEditForm.groupPolicy} onChange={e => setChannelEditForm({ ...channelEditForm, groupPolicy: e.target.value })}
-                                style={{ width: '100%', padding: '2px 4px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 11 }}>
+                                style={{ width: '100%', padding: '2px 4px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 14 }}>
                                 <option value="allowlist">Allowlist</option>
                                 <option value="open">Open</option>
                                 <option value="deny">Deny</option>
@@ -1813,9 +1813,9 @@ export default function ManagePage() {
                           </Row>
 
                           <div style={{ marginBottom: 8 }}>
-                            <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 11 }}>流式模式</div>
+                            <div style={{ color: 'var(--text-secondary)', marginBottom: 2, fontSize: 14 }}>流式模式</div>
                             <select value={channelEditForm.streamMode} onChange={e => setChannelEditForm({ ...channelEditForm, streamMode: e.target.value })}
-                              style={{ width: '100%', padding: '3px 6px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 11 }}>
+                              style={{ width: '100%', padding: '3px 6px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 14 }}>
                               <option value="partial">Partial</option>
                               <option value="full">Full</option>
                               <option value="none">None</option>
@@ -1823,8 +1823,8 @@ export default function ManagePage() {
                           </div>
 
                           <div style={{ display: 'flex', gap: 6 }}>
-                            <button onClick={() => setEditingChannel(null)} style={{ flex: 1, background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', padding: '3px 0', cursor: 'pointer', fontSize: 11 }}>取消</button>
-                            <button onClick={() => handleSaveChannel(channel.name)} style={{ flex: 1, background: 'var(--figma-blue)', border: 'none', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', padding: '3px 0', cursor: 'pointer', fontSize: 11 }}>保存</button>
+                            <button onClick={() => setEditingChannel(null)} style={{ flex: 1, background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', padding: '3px 0', cursor: 'pointer', fontSize: 14 }}>取消</button>
+                            <button onClick={() => handleSaveChannel(channel.name)} style={{ flex: 1, background: 'var(--figma-blue)', border: 'none', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', padding: '3px 0', cursor: 'pointer', fontSize: 14 }}>保存</button>
                           </div>
                         </div>
                       ) : (
@@ -1836,13 +1836,13 @@ export default function ManagePage() {
                             </span>
                             {(channel.hasBotToken || channel.hasToken || channel.hasApiKey) && (
                               <span className="figma-badge figma-badge-green" style={{ marginLeft: 4 }}>
-                                <CheckCircleOutlined style={{ fontSize: 10, marginRight: 2 }} />
+                                <CheckCircleOutlined style={{ fontSize: 16, marginRight: 2 }} />
                                 已配置
                               </span>
                             )}
                           </div>
 
-                          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 8 }}>
+                          <div style={{ fontSize: 14, color: 'var(--text-tertiary)', marginBottom: 8 }}>
                             <div>DM: {channel.dmPolicy} · 群组: {channel.groupPolicy}</div>
                             <div>流式: {channel.streamMode}</div>
                           </div>
@@ -1858,7 +1858,7 @@ export default function ManagePage() {
                               color: 'var(--figma-blue)',
                               padding: '4px 0',
                               cursor: 'pointer',
-                              fontSize: 11
+                              fontSize: 14
                             }}
                           >
                             {testingChannel === channel.name ? '测试中...' : '测试连接'}
@@ -1924,7 +1924,7 @@ export default function ManagePage() {
                   <div style={{ fontSize: 15, color: 'var(--text-primary)', marginBottom: 12 }}>
                     正在生成二维码...
                   </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
+                  <div style={{ fontSize: 15, color: 'var(--text-tertiary)' }}>
                     如果长时间未显示，请查看终端窗口
                   </div>
                 </div>
@@ -1957,7 +1957,7 @@ export default function ManagePage() {
               )}
             </div>
 
-            <div style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.8, textAlign: 'center' }}>
+            <div style={{ fontSize: 15, color: 'var(--text-tertiary)', lineHeight: 1.8, textAlign: 'center' }}>
               {whatsappQRCode ? (
                 <>
                   <div style={{ marginBottom: 8, fontWeight: 600, color: 'var(--text-tertiary)' }}>扫码步骤：</div>
@@ -1991,8 +1991,8 @@ export default function ManagePage() {
         <div className="figma-panel-body">
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>重启 Gateway</div>
-              <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>重启 OpenClaw Gateway 服务，重启期间服务会短暂中断（约 5-10 秒）</div>
+              <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>重启 Gateway</div>
+              <div style={{ fontSize: 15, color: 'var(--text-tertiary)' }}>重启 OpenClaw Gateway 服务，重启期间服务会短暂中断（约 5-10 秒）</div>
             </div>
             <button
               disabled={restarting}
@@ -2005,7 +2005,7 @@ export default function ManagePage() {
                   .finally(() => setTimeout(() => setRestarting(false), 5000));
               }}
               style={{
-                padding: '8px 20px', fontSize: 13, fontWeight: 500,
+                padding: '8px 20px', fontSize: 16, fontWeight: 500,
                 background: restarting ? 'var(--bg-tertiary)' : 'rgba(242, 72, 34, 0.1)',
                 border: '1px solid var(--figma-red)',
                 borderRadius: 'var(--radius-sm)',

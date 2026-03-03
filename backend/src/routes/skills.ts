@@ -4,11 +4,11 @@ import path from 'path';
 
 const router = Router();
 
-const SYSTEM_SKILLS_DIR = '/Users/wangjian/.nvm/versions/node/v24.0.2/lib/node_modules/openclaw/skills';
-const CUSTOM_SKILLS_DIR = '/Users/wangjian/.openclaw/workspace/skills';
+const SYSTEM_SKILLS_DIR = '/root/.nvm/versions/node/v22.22.0/lib/node_modules/openclaw/skills';
+const CUSTOM_SKILLS_DIR = '/root/.openclaw/workspace/skills';
 
 async function scanSkillsDir(dir: string, source: string) {
-  const skills = [];
+  const skills: any[] = [];
   if (!await fs.pathExists(dir)) return skills;
 
   const entries = await fs.readdir(dir, { withFileTypes: true });

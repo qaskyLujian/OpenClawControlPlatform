@@ -49,7 +49,7 @@ export default function TeamPage() {
 
   if (loading || !teamData) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px', fontSize: 13, color: 'var(--text-primary)' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px', fontSize: 16, color: 'var(--text-primary)' }}>
         加载中...
       </div>
     );
@@ -113,7 +113,7 @@ export default function TeamPage() {
                     <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
                       {agent.name}
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontFamily: 'monospace' }}>
+                    <div style={{ fontSize: 14, color: 'var(--text-secondary)', fontFamily: 'monospace' }}>
                       {agent.model}
                     </div>
                   </div>
@@ -130,11 +130,11 @@ export default function TeamPage() {
 
               {/* Status */}
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 6 }}>
+                <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 6 }}>
                   {agent.online ? '当前任务' : '最后任务'}
                 </div>
                 <div style={{ 
-                  fontSize: 13, 
+                  fontSize: 16, 
                   color: 'var(--text-primary)', 
                   fontWeight: 500,
                   overflow: 'hidden',
@@ -154,20 +154,20 @@ export default function TeamPage() {
                 borderTop: '1px solid var(--border-subtle)'
               }}>
                 <div>
-                  <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginBottom: 4 }}>会话</div>
+                  <div style={{ fontSize: 16, color: 'var(--text-secondary)', marginBottom: 4 }}>会话</div>
                   <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--figma-blue)' }}>
                     {agent.sessionCount}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginBottom: 4 }}>Token</div>
+                  <div style={{ fontSize: 16, color: 'var(--text-secondary)', marginBottom: 4 }}>Token</div>
                   <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--figma-purple)' }}>
                     {formatTokens(agent.totalTokens)}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginBottom: 4 }}>最后活跃</div>
-                  <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-tertiary)' }}>
+                  <div style={{ fontSize: 16, color: 'var(--text-secondary)', marginBottom: 4 }}>最后活跃</div>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-tertiary)' }}>
                     {formatTime(agent.lastActive)}
                   </div>
                 </div>
@@ -176,7 +176,7 @@ export default function TeamPage() {
               {/* Workspace */}
               <div style={{ 
                 marginTop: 12,
-                fontSize: 10,
+                fontSize: 16,
                 color: 'var(--text-tertiary)',
                 fontFamily: 'monospace',
                 overflow: 'hidden',
@@ -229,7 +229,7 @@ export default function TeamPage() {
                     minWidth: 120
                   }}>
                     <span style={{ fontSize: 20 }}>{session.agentEmoji}</span>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
+                    <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>
                       {session.agentName}
                     </span>
                   </div>
@@ -237,7 +237,7 @@ export default function TeamPage() {
                   {/* Task Label */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ 
-                      fontSize: 13, 
+                      fontSize: 16, 
                       color: 'var(--text-primary)',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -249,14 +249,14 @@ export default function TeamPage() {
 
                   {/* Stats */}
                   <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                    <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+                    <div style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
                       🔤 {formatTokens(session.tokenCount)}
                     </div>
                     <span className={`figma-badge figma-badge-${session.status === 'active' ? 'green' : 'gray'}`}>
                       {session.status === 'active' ? '活跃' : '完成'}
                     </span>
                     <div style={{ 
-                      fontSize: 11, 
+                      fontSize: 14, 
                       color: 'var(--text-tertiary)',
                       minWidth: 100,
                       textAlign: 'right'

@@ -316,7 +316,7 @@ body {
   padding: var(--space-3);
   margin-bottom: var(--space-1);
   border-radius: var(--radius-md);
-  font-size: 13px;
+  font-size: 21px;
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -597,4 +597,27 @@ body {
 [data-theme="light"] .figma-input {
   background: #ffffff !important;
   border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+
+/* 对话中心输入框强制高度 */
+.chat-textarea {
+  resize: vertical !important;
+}
+
+.chat-textarea:empty::before,
+.chat-textarea.is-empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+.chat-textarea.italic-mode *,
+.chat-textarea.italic-mode {
+  font-style: oblique !important;
+}
+
+.chat-textarea.bold-mode,
+.chat-textarea.bold-mode * {
+  font-weight: 700 !important;
 }

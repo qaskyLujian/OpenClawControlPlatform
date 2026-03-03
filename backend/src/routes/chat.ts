@@ -8,8 +8,8 @@ import fs from 'fs-extra';
 
 const router = Router();
 const execAsync = promisify(exec);
-const OPENCLAW = path.join(os.homedir(), '.nvm/versions/node/v24.0.2/bin/openclaw');
-const ENV = { ...process.env, PATH: `${os.homedir()}/.nvm/versions/node/v24.0.2/bin:${process.env.PATH}` };
+const OPENCLAW = path.join(os.homedir(), '.nvm/versions/node/v22.22.0/bin/openclaw');
+const ENV = { ...process.env, PATH: `${os.homedir()}/.nvm/versions/node/v22.22.0/bin:${process.env.PATH}` };
 
 // 动态获取主会话 ID（和 TUI/Telegram/WhatsApp 共享）
 async function getMainSessionId(): Promise<string> {
@@ -101,7 +101,7 @@ router.post('/', upload.array('files', 5), async (req: any, res) => {
     // 使用主会话（和 TUI/Telegram/WhatsApp 共享同一会话上下文）
     const sessionId = await getMainSessionId();
     const { stdout } = await execAsync(
-      `${OPENCLAW} agent --session-id ${sessionId} --message '${escaped}' --json`,
+      `${OPENCLAW} agent --agent main --session-id ${sessionId} --message '${escaped}' --json`,
       { timeout: 120000, env: ENV, maxBuffer: 2 * 1024 * 1024 }
     );
 
@@ -217,6 +217,15 @@ function getMimeType(filePath: string): string {
     '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   };
   return map[ext] || 'application/octet-stream';
+}
+
+// 清理消息内容中的时间戳和 message_id
+function cleanMessageContent(content: string): string {
+  // 移除开头的时间戳，如 [Sat 2026-02-28 13:29 GMT+8]
+  let cleaned = content.replace(/^\[(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+GMT[+-]\d+\]\s*/gm, '');
+  // 移除结尾的 message_id，如 [message_id: xxx-xxx-xxx]
+  cleaned = cleaned.replace(/\[message_id:\s*[a-f0-9-]+\]\s*$/gm, '');
+  return cleaned.trim();
 }
 
 // POST /api/chat/translate - 翻译文本（支持快速翻译和详细释义）
@@ -436,7 +445,7 @@ router.get('/history', async (req, res) => {
             messages.push({
               id: entry.id || `${entry.timestamp || Date.now()}`,
               role: msg.role,
-              content,
+              content: cleanMessageContent(content),
               timestamp: new Date(entry.timestamp || Date.now()).getTime()
             });
           }

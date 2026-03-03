@@ -8,5 +8,16 @@ export default defineConfig({
     host: '0.0.0.0', // 监听所有网络接口
     port: 5173,
     strictPort: true, // 端口被占用时报错而不是自动尝试下一个
+    proxy: {
+      '/api': {
+        target: 'http://localhost:16116',
+        changeOrigin: true,
+      },
+      '/socket.io': {
+        target: 'http://localhost:16116',
+        changeOrigin: true,
+        ws: true,
+      }
+    }
   }
 })

@@ -24,7 +24,7 @@ const io = new Server(httpServer, {
   }
 });
 
-const PORT = process.env.PORT || 7749;
+const PORT = Number(process.env.PORT) || 16116;
 const HOST = process.env.HOST || '0.0.0.0'; // 监听所有网络接口
 
 // Middleware
@@ -34,6 +34,10 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Serve frontend static files BEFORE auth
+import path from 'path';
+app.use(express.static(path.join(__dirname, '../dist-frontend')));
 
 // Simple auth middleware
 const AUTH_TOKEN = process.env.ADMIN_TOKEN || 'wj12345';
@@ -94,6 +98,11 @@ io.on('connection', (socket) => {
 
 // Import dashboard data function
 import { getDashboardData } from './services/system';
+
+// SPA fallback
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist-frontend/index.html'));
+});
 
 // Start server
 httpServer.listen(PORT, HOST, () => {

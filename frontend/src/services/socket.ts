@@ -1,15 +1,6 @@
 import { io } from 'socket.io-client';
 
-// 自动检测 Socket URL
-const getSocketUrl = () => {
-  const hostname = window.location.hostname;
-  if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-    return `http://${hostname}:7749`;
-  }
-  return import.meta.env.VITE_API_URL || 'http://localhost:7749';
-};
-
-const SOCKET_URL = getSocketUrl();
+const SOCKET_URL = `${window.location.protocol}//${window.location.host}`;
 
 console.log('🔌 Socket URL:', SOCKET_URL);
 

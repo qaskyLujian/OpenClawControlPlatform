@@ -62,7 +62,7 @@ export default function Login({ onLogin }: LoginProps) {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            OpenClaw Admin
+            OpenClaw管控中心
           </h1>
           <p style={{ 
             fontSize: 13,

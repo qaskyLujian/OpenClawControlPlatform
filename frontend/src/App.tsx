@@ -35,7 +35,7 @@ function App() {
 
   const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
 
-  const handleLogin = (token: string) => {
+  const handleLogin = (_token: string) => {
     setIsAuthenticated(true);
   };
 

@@ -1,12 +1,8 @@
 import axios from 'axios';
 
-// 自动检测 API URL
+// 自动检测 API URL — 使用当前页面的 host（同端口）
 const getApiBaseUrl = () => {
-  const hostname = window.location.hostname;
-  if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-    return `http://${hostname}:7749`;
-  }
-  return import.meta.env.VITE_API_URL || 'http://localhost:7749';
+  return `${window.location.protocol}//${window.location.host}`;
 };
 
 const API_BASE_URL = getApiBaseUrl();

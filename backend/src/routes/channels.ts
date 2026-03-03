@@ -218,11 +218,11 @@ router.post('/:name/test', async (req, res) => {
     if (name === 'whatsapp') {
       try {
         const { execSync } = require('child_process');
-        const openclawBin = '/Users/wangjian/.nvm/versions/node/v24.0.2/bin/openclaw';
+        const openclawBin = '/root/.nvm/versions/node/v22.22.0/bin/openclaw';
         const output = execSync(`${openclawBin} status 2>&1`, {
           encoding: 'utf-8',
           timeout: 10000,
-          env: { ...process.env, PATH: `/Users/wangjian/.nvm/versions/node/v24.0.2/bin:${process.env.PATH}` }
+          env: { ...process.env, PATH: `/root/.nvm/versions/node/v22.22.0/bin:${process.env.PATH}` }
         });
         // 检查 WhatsApp 行的状态
         const waLine = output.split('\n').find((l: string) => l.includes('WhatsApp'));

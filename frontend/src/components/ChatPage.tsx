@@ -31,7 +31,12 @@ export default function ChatPage() {
   const [autoScroll, setAutoScroll] = useState(true);
   const [isBold, setIsBoldRaw] = useState(() => localStorage.getItem('chat_isBold') === 'true');
   const setIsBold = (v: boolean | ((p: boolean) => boolean)) => {
-    setIsBoldRaw(prev => { const next = typeof v === 'function' ? v(prev) : v; localStorage.setItem('chat_isBold', String(next)); return next; });
+    setIsBoldRaw(prev => { 
+      const next = typeof v === 'function' ? v(prev) : v; 
+      console.log('isBold changed:', prev, '->', next);
+      localStorage.setItem('chat_isBold', String(next)); 
+      return next; 
+    });
   };
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [textColor, setTextColorRaw] = useState(() => localStorage.getItem('chat_textColor') || '#ffffff');
@@ -514,6 +519,7 @@ export default function ChatPage() {
             </button>
           </div>
           <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'flex-end' }}>
+            {/* Debug: isBold = {String(isBold)} */}
             <textarea
               ref={textareaRef}
               value={input}
@@ -526,6 +532,7 @@ export default function ChatPage() {
               }}
               placeholder="输入消息... (Enter 发送, Shift+Enter 换行)"
               disabled={loading}
+              className={`chat-textarea ${isBold ? 'bold-mode' : ''}`}
               style={{
                 flex: 1, padding: '8px 12px', background: 'var(--bg-primary)',
                 border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)',

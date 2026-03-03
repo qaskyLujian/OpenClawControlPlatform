@@ -1,14 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { CloseOutlined, CopyOutlined, CheckOutlined, GlobalOutlined, EnterOutlined } from '@ant-design/icons';
 
-const getApiBase = () => {
-  const hostname = window.location.hostname;
-  if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-    return `http://${hostname}:7749`;
-  }
-  return import.meta.env.VITE_API_URL || 'http://localhost:7749';
-};
-const API_BASE = getApiBase();
+const API_BASE = `${window.location.protocol}//${window.location.host}`;
 
 interface TranslatePanelProps {
   onClose: () => void;

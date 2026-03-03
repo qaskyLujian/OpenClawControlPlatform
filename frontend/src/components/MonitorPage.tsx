@@ -148,7 +148,7 @@ export default function MonitorPage() {
 
   if (loading || !dashboard) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px', fontSize: 13, color: 'var(--text-primary)' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px', fontSize: 16, color: 'var(--text-primary)' }}>
         加载中...
       </div>
     );
@@ -288,7 +288,7 @@ export default function MonitorPage() {
           <div className="figma-panel" style={{ height: '100%' }}>
             <div className="figma-panel-header">
               <div className="figma-panel-title">CPU</div>
-              <span className={`figma-badge figma-badge-${dashboard.system.cpu >= 80 ? 'red' : dashboard.system.cpu >= 60 ? 'yellow' : 'green'}`} style={{ fontSize: 10 }}>
+              <span className={`figma-badge figma-badge-${dashboard.system.cpu >= 80 ? 'red' : dashboard.system.cpu >= 60 ? 'yellow' : 'green'}`} style={{ fontSize: 16 }}>
                 {dashboard.system.cpu >= 80 ? '高' : dashboard.system.cpu >= 60 ? '中' : '低'}
               </span>
             </div>
@@ -304,7 +304,7 @@ export default function MonitorPage() {
           <div className="figma-panel" style={{ height: '100%' }}>
             <div className="figma-panel-header">
               <div className="figma-panel-title">内存</div>
-              <span className={`figma-badge figma-badge-${dashboard.system.memory >= 80 ? 'red' : dashboard.system.memory >= 60 ? 'yellow' : 'green'}`} style={{ fontSize: 10 }}>
+              <span className={`figma-badge figma-badge-${dashboard.system.memory >= 80 ? 'red' : dashboard.system.memory >= 60 ? 'yellow' : 'green'}`} style={{ fontSize: 16 }}>
                 {dashboard.system.memory >= 80 ? '高' : dashboard.system.memory >= 60 ? '中' : '低'}
               </span>
             </div>
@@ -321,7 +321,7 @@ export default function MonitorPage() {
             <div className="figma-panel" style={{ height: '100%' }}>
               <div className="figma-panel-header">
                 <div className="figma-panel-title">Channels 连接</div>
-                <span className="figma-badge figma-badge-blue" style={{ fontSize: 10 }}>{dashboard.channels.length} 个</span>
+                <span className="figma-badge figma-badge-blue" style={{ fontSize: 16 }}>{dashboard.channels.length} 个</span>
               </div>
               <div className="figma-panel-body" style={{ maxHeight: 168, overflowY: 'auto', padding: 'var(--space-3)' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 'var(--space-2)' }}>
@@ -334,12 +334,12 @@ export default function MonitorPage() {
                       transition: 'all 0.2s ease'
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{ch.name}</span>
-                        <span className={`figma-badge figma-badge-${ch.state === 'OK' ? 'green' : 'red'}`} style={{ fontSize: 9 }}>
+                        <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>{ch.name}</span>
+                        <span className={`figma-badge figma-badge-${ch.state === 'OK' ? 'green' : 'red'}`} style={{ fontSize: 15 }}>
                           {ch.state}
                         </span>
                       </div>
-                      <div style={{ fontSize: 10, color: 'var(--text-tertiary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <div style={{ fontSize: 16, color: 'var(--text-tertiary)', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {ch.detail}
                       </div>
                     </div>
@@ -357,11 +357,11 @@ export default function MonitorPage() {
           <div className="figma-panel" style={{ height: '100%' }}>
             <div className="figma-panel-header">
               <div className="figma-panel-title">会话列表</div>
-              <span className="figma-badge figma-badge-blue" style={{ fontSize: 10 }}>{sessions.length}</span>
+              <span className="figma-badge figma-badge-blue" style={{ fontSize: 16 }}>{sessions.length}</span>
             </div>
             <div className="figma-panel-body" style={{ maxHeight: 340, overflowY: 'auto', padding: 'var(--space-2)' }}>
               {sessions.length === 0 ? (
-                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center', padding: 30 }}>暂无会话</div>
+                <div style={{ fontSize: 15, color: 'var(--text-tertiary)', textAlign: 'center', padding: 30 }}>暂无会话</div>
               ) : sessions.map((session, index) => (
                 <div key={index} style={{
                   padding: 'var(--space-2)',
@@ -372,7 +372,7 @@ export default function MonitorPage() {
                   transition: 'all 0.2s ease'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '70%' }}>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '70%' }}>
                       {(() => {
                         if (session.label) return getAgentDisplayName(session.label);
 
@@ -395,19 +395,19 @@ export default function MonitorPage() {
                       })()}
                     </span>
                     {session.kind && session.kind !== 'main' && (
-                      <span className="figma-badge figma-badge-yellow" style={{ fontSize: 9 }}>{session.kind === 'isolated' ? '子代理' : session.kind}</span>
+                      <span className="figma-badge figma-badge-yellow" style={{ fontSize: 15 }}>{session.kind === 'isolated' ? '子代理' : session.kind}</span>
                     )}
                   </div>
                   <div style={{ display: 'flex', gap: 'var(--space-1)', marginBottom: 3, flexWrap: 'wrap' }}>
-                    <span className="figma-badge figma-badge-blue" style={{ fontSize: 9 }}>{session.channel || 'unknown'}</span>
-                    <span className={`figma-badge figma-badge-${session.active ? 'green' : 'gray'}`} style={{ fontSize: 9 }}>
+                    <span className="figma-badge figma-badge-blue" style={{ fontSize: 15 }}>{session.channel || 'unknown'}</span>
+                    <span className={`figma-badge figma-badge-${session.active ? 'green' : 'gray'}`} style={{ fontSize: 15 }}>
                       {session.active ? '活跃' : '空闲'}
                     </span>
                     {session.model && (
-                      <span className="figma-badge figma-badge-purple" style={{ fontSize: 9 }}>{session.model}</span>
+                      <span className="figma-badge figma-badge-purple" style={{ fontSize: 15 }}>{session.model}</span>
                     )}
                   </div>
-                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', display: 'flex', gap: 'var(--space-2)' }}>
+                  <div style={{ fontSize: 16, color: 'var(--text-tertiary)', display: 'flex', gap: 'var(--space-2)' }}>
                     <span>💬 {session.messageCount}</span>
                     <span>🔤 {session.tokenCount > 1000 ? (session.tokenCount / 1000).toFixed(1) + 'K' : session.tokenCount}</span>
                   </div>
@@ -420,11 +420,11 @@ export default function MonitorPage() {
           <div className="figma-panel" style={{ height: '100%' }}>
             <div className="figma-panel-header">
               <div className="figma-panel-title">子代理任务</div>
-              <span className="figma-badge figma-badge-yellow" style={{ fontSize: 10 }}>{subagentTasks.length}</span>
+              <span className="figma-badge figma-badge-yellow" style={{ fontSize: 16 }}>{subagentTasks.length}</span>
             </div>
             <div className="figma-panel-body" style={{ maxHeight: 340, overflowY: 'auto', padding: 'var(--space-2)' }}>
               {subagentTasks.length === 0 ? (
-                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center', padding: 30 }}>暂无子代理</div>
+                <div style={{ fontSize: 15, color: 'var(--text-tertiary)', textAlign: 'center', padding: 30 }}>暂无子代理</div>
               ) : subagentTasks.map((task, index) => (
                 <div key={index} style={{
                   padding: 'var(--space-2)',
@@ -435,15 +435,15 @@ export default function MonitorPage() {
                   transition: 'all 0.2s ease'
                 }}>
                   <div style={{ marginBottom: 4 }}>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)' }}>{task.label}</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{task.label}</span>
                   </div>
                   <div style={{ display: 'flex', gap: 'var(--space-1)', marginBottom: 3 }}>
-                    <span className={`figma-badge figma-badge-${task.status === 'running' ? 'green' : task.status === 'failed' ? 'red' : 'gray'}`} style={{ fontSize: 9 }}>
+                    <span className={`figma-badge figma-badge-${task.status === 'running' ? 'green' : task.status === 'failed' ? 'red' : 'gray'}`} style={{ fontSize: 15 }}>
                       {task.status === 'running' ? '运行中' : task.status === 'failed' ? '失败' : '完成'}
                     </span>
-                    <span className="figma-badge figma-badge-blue" style={{ fontSize: 9 }}>{task.model}</span>
+                    <span className="figma-badge figma-badge-blue" style={{ fontSize: 15 }}>{task.model}</span>
                   </div>
-                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
+                  <div style={{ fontSize: 16, color: 'var(--text-tertiary)' }}>
                     {task.updatedAt ? new Date(task.updatedAt).toLocaleString('zh-CN', { hour12: false, month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : ''}
                   </div>
                 </div>
@@ -456,7 +456,7 @@ export default function MonitorPage() {
             <div className="figma-panel" style={{ height: '100%' }}>
               <div className="figma-panel-header">
                 <div className="figma-panel-title">模型 Token 统计</div>
-                <span className="figma-badge figma-badge-purple" style={{ fontSize: 10 }}>今日</span>
+                <span className="figma-badge figma-badge-purple" style={{ fontSize: 16 }}>今日</span>
               </div>
               <div className="figma-panel-body" style={{ maxHeight: 340, overflowY: 'auto', padding: 'var(--space-3)' }}>
                 {dashboard.usage.modelStats.map((stat, idx) => {
@@ -471,8 +471,8 @@ export default function MonitorPage() {
                   return (
                     <div key={idx} style={{ marginBottom: 'var(--space-3)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                        <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontFamily: 'monospace' }}>{stat.model}</span>
-                        <span style={{ fontSize: 11, color: '#a78bfa', fontWeight: 600 }}>{displayTokens}</span>
+                        <span style={{ fontSize: 14, color: 'var(--text-secondary)', fontFamily: 'monospace' }}>{stat.model}</span>
+                        <span style={{ fontSize: 14, color: '#a78bfa', fontWeight: 600 }}>{displayTokens}</span>
                       </div>
                       <div style={{
                         height: 6,
@@ -513,7 +513,7 @@ export default function MonitorPage() {
               </div>
               <div className="figma-panel-body">
                 <div style={{ marginBottom: 'var(--space-3)' }}>
-                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Token 使用</div>
+                  <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>Token 使用</div>
                   <div style={{ fontSize: 24, fontWeight: 600, color: 'var(--figma-blue)' }}>
                     {(provider.totalTokens || 0) > 1000000
                       ? ((provider.totalTokens || 0) / 1000000).toFixed(2) + 'M'
@@ -536,7 +536,7 @@ export default function MonitorPage() {
                     }} />
                   </div>
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+                <div style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
                   <div>请求: {provider.totalRequests || 0}</div>
                   {provider.models?.map((m, i) => (
                     <div key={i} style={{ marginTop: 4, color: 'var(--text-tertiary)' }}>· {m.name || m.id}</div>
@@ -558,7 +558,7 @@ export default function MonitorPage() {
             {skills.length > 8 && (
               <button onClick={() => setShowAllSkills(!showAllSkills)} style={{
                 background: 'none', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)',
-                color: 'var(--figma-blue)', fontSize: 11, padding: '2px 8px', cursor: 'pointer'
+                color: 'var(--figma-blue)', fontSize: 14, padding: '2px 8px', cursor: 'pointer'
               }}>
                 {showAllSkills ? '收起' : `展开全部 (${skills.length})`}
               </button>
@@ -576,7 +576,7 @@ export default function MonitorPage() {
                 style={{
                   width: '100%', padding: '6px 12px', background: 'var(--bg-tertiary)',
                   border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)',
-                  color: 'var(--text-primary)', fontSize: 12, outline: 'none', boxSizing: 'border-box'
+                  color: 'var(--text-primary)', fontSize: 15, outline: 'none', boxSizing: 'border-box'
                 }}
               />
             </div>
@@ -594,7 +594,7 @@ export default function MonitorPage() {
                   onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--figma-blue)'; }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-subtle)'; }}
                 >
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {skill.name}
                   </div>
                   <span className={`figma-badge figma-badge-${skill.source === 'system' ? 'blue' : 'green'}`}>
@@ -611,7 +611,7 @@ export default function MonitorPage() {
                   onClick={() => setShowAllSkills(true)}
                 >
                   <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--figma-blue)' }}>+{skills.length - 8}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>点击展开</div>
+                  <div style={{ fontSize: 14, color: 'var(--text-secondary)' }}>点击展开</div>
                 </div>
               </Col>
             )}
@@ -633,11 +633,11 @@ export default function MonitorPage() {
                   </span>
                 </div>
               </div>
-              <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 6 }}>
+              <div style={{ fontSize: 15, color: 'var(--text-tertiary)', marginBottom: 6 }}>
                 <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>描述：</span>
                 {selectedSkill.description || '暂无描述'}
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>
+              <div style={{ fontSize: 14, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>
                 来源：{selectedSkill.source === 'system' ? '系统内置' : '用户自定义'}
               </div>
             </div>
@@ -653,7 +653,7 @@ export default function MonitorPage() {
         </div>
         <div style={{
           padding: 'var(--space-3)', background: 'var(--bg-secondary)',
-          maxHeight: '300px', overflowY: 'auto', fontFamily: 'monospace', fontSize: 12
+          maxHeight: '300px', overflowY: 'auto', fontFamily: 'monospace', fontSize: 15
         }}>
           {logs.length === 0 ? (
             <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 20 }}>暂无日志</div>
@@ -669,7 +669,7 @@ export default function MonitorPage() {
                 <span style={{ color: 'var(--text-secondary)', minWidth: 60 }}>{time}</span>
                 <span style={{
                   color: log.level === 'warn' || log.level === 'warning' ? 'var(--figma-yellow)' : log.level === 'error' ? 'var(--figma-red)' : '#cccccc',
-                  minWidth: 50, fontSize: 11, fontWeight: 500
+                  minWidth: 50, fontSize: 14, fontWeight: 500
                 }}>
                   {(log.level || 'info').toUpperCase()}
                 </span>

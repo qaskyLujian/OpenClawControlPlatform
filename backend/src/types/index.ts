@@ -12,10 +12,14 @@ export interface DashboardData {
   usage: {
     tokensToday: number;
     requestsToday: number;
+    modelStats?: { model: string; tokens: number }[];
   };
+  channels?: any[];
   system: {
     cpu: number;
     memory: number;
+    cpuHistory?: number[];
+    memoryHistory?: number[];
   };
 }
 
