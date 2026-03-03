@@ -45,6 +45,30 @@ export default function ChatPage() {
   const setFontSize = (v: string) => { localStorage.setItem('chat_fontSize', v); setFontSizeRaw(v); };
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // 消息样式缓存
+  const getMessageKey = (msg: Message) => {
+    // 只使用内容作为唯一标识（前100字符）
+    const key = msg.content.slice(0, 100);
+    console.log('getMessageKey:', key);
+    return key;
+  };
+
+  const saveMessageStyle = (msg: Message, style: any) => {
+    const cache = JSON.parse(localStorage.getItem('chat_message_styles') || '{}');
+    const key = getMessageKey(msg);
+    cache[key] = style;
+    console.log('saveMessageStyle:', key, style);
+    localStorage.setItem('chat_message_styles', JSON.stringify(cache));
+  };
+
+  const getMessageStyle = (msg: Message) => {
+    const cache = JSON.parse(localStorage.getItem('chat_message_styles') || '{}');
+    const key = getMessageKey(msg);
+    const style = cache[key];
+    console.log('getMessageStyle:', key, style);
+    return style;
+  };
+
   const insertAtCursor = (text: string) => {
     const ta = textareaRef.current;
     if (!ta) return;
@@ -99,7 +123,15 @@ export default function ChatPage() {
         if (!resp.ok) return;
         const data = await resp.json();
         if (data.messages && Array.isArray(data.messages)) {
-          setMessages(data.messages);
+          // 恢复消息样式
+          const messagesWithStyle = data.messages.map((msg: Message) => {
+            const savedStyle = getMessageStyle(msg);
+            if (savedStyle) {
+              return { ...msg, textStyle: savedStyle };
+            }
+            return msg;
+          });
+          setMessages(messagesWithStyle);
           setLastSync(Date.now());
         }
       } catch (err) {
@@ -125,12 +157,14 @@ export default function ChatPage() {
       textStyle: { fontSize: parseInt(fontSize), color: textColor, fontFamily: fontFamily === '默认' ? undefined : fontFamily, isBold }
     };
 
+    // 保存消息样式到缓存
+    saveMessageStyle(userMessage, userMessage.textStyle);
+
     setMessages(prev => [...prev, userMessage]);
     const currentInput = rawContent;
     const currentFiles = [...pendingFiles];
     setInput('');
     setPendingFiles([]);
-    setIsBold(false);
     setLoading(true);
 
     try {
