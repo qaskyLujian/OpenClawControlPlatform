@@ -1,6 +1,6 @@
-# 🦞 OpenClaw 剑控系统
+# 🦞 OpenClaw 管控平台
 
-OpenClaw 管理中心 — 一个为 [OpenClaw](https://github.com/openclaw/openclaw) AI 助手打造的全功能 Web 管理平台。
+OpenClaw 管控平台 — 一个为 [OpenClaw](https://github.com/openclaw/openclaw) AI 助手打造的全功能 Web 管理平台。
 
 提供实时监控、多渠道管理、定时任务调度、AI 对话等一站式管理能力，让你通过浏览器即可掌控 OpenClaw 的一切。
 
