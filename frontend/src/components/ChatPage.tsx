@@ -39,6 +39,23 @@ export default function ChatPage() {
     });
   };
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showBgPicker, setShowBgPicker] = useState(false);
+  const [chatBg, setChatBgRaw] = useState(() => localStorage.getItem('chat_bg') || 'default');
+  const setChatBg = (v: string) => { localStorage.setItem('chat_bg', v); setChatBgRaw(v); };
+  
+  // AI 消息样式
+  const [aiMsgBold, setAiMsgBoldRaw] = useState(() => localStorage.getItem('ai_msg_bold') === 'true');
+  const setAiMsgBold = (v: boolean) => { localStorage.setItem('ai_msg_bold', String(v)); setAiMsgBoldRaw(v); };
+  const [aiMsgColor, setAiMsgColorRaw] = useState(() => localStorage.getItem('ai_msg_color') || 'var(--text-primary)');
+  const setAiMsgColor = (v: string) => { localStorage.setItem('ai_msg_color', v); setAiMsgColorRaw(v); };
+  const [aiMsgSize, setAiMsgSizeRaw] = useState(() => localStorage.getItem('ai_msg_size') || '14');
+  const setAiMsgSize = (v: string) => { localStorage.setItem('ai_msg_size', v); setAiMsgSizeRaw(v); };
+  const [aiMsgFont, setAiMsgFontRaw] = useState(() => localStorage.getItem('ai_msg_font') || '默认');
+  const setAiMsgFont = (v: string) => { localStorage.setItem('ai_msg_font', v); setAiMsgFontRaw(v); };
+  const [aiMsgBgColor, setAiMsgBgColorRaw] = useState(() => localStorage.getItem('ai_msg_bg_color') || 'var(--bg-tertiary)');
+  const setAiMsgBgColor = (v: string) => { localStorage.setItem('ai_msg_bg_color', v); setAiMsgBgColorRaw(v); };
+  
   const [textColor, setTextColorRaw] = useState(() => localStorage.getItem('chat_textColor') || '#ffffff');
   const setTextColor = (v: string) => { localStorage.setItem('chat_textColor', v); setTextColorRaw(v); };
   const [fontSize, setFontSizeRaw] = useState(() => localStorage.getItem('chat_fontSize') || '14');
@@ -301,8 +318,34 @@ export default function ChatPage() {
               </span>
             )}
           </div>
-          <button className="figma-button figma-button-secondary" onClick={clearChat}
-            style={{ fontSize: 12, padding: '4px 12px' }}>清空对话</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {/* AI 消息样式控件 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', background: 'var(--bg-primary)', borderRadius: 4, border: '1px solid var(--border-subtle)' }}>
+              <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>AI样式:</span>
+              {/* 加粗 */}
+              <button onClick={() => setAiMsgBold(!aiMsgBold)} title="AI消息加粗" style={{ background: aiMsgBold ? 'var(--figma-blue)' : 'none', border: '1px solid var(--border-subtle)', borderRadius: 3, color: aiMsgBold ? '#fff' : 'var(--text-secondary)', cursor: 'pointer', padding: '2px 6px', fontWeight: 700, fontSize: 12 }}>
+                B
+              </button>
+              {/* 字号 */}
+              <select value={aiMsgSize} onChange={e => setAiMsgSize(e.target.value)} title="AI消息字号"
+                style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 3, color: 'var(--text-secondary)', padding: '2px 4px', fontSize: 11, cursor: 'pointer' }}>
+                {['12','14','16','18','20'].map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+              {/* 字体 */}
+              <select value={aiMsgFont} onChange={e => setAiMsgFont(e.target.value)} title="AI消息字体"
+                style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 3, color: 'var(--text-secondary)', padding: '2px 4px', fontSize: 11, cursor: 'pointer' }}>
+                {FONTS.map(f => <option key={f} value={f}>{f}</option>)}
+              </select>
+              {/* 文字颜色 */}
+              <input type="color" value={aiMsgColor.startsWith('#') ? aiMsgColor : '#000000'} onChange={e => setAiMsgColor(e.target.value)} title="AI消息文字颜色"
+                style={{ width: 24, height: 24, border: '1px solid var(--border-subtle)', borderRadius: 3, cursor: 'pointer' }} />
+              {/* 气泡背景色 */}
+              <input type="color" value={aiMsgBgColor.startsWith('#') ? aiMsgBgColor : '#f0f0f0'} onChange={e => setAiMsgBgColor(e.target.value)} title="AI消息气泡背景色"
+                style={{ width: 24, height: 24, border: '1px solid var(--border-subtle)', borderRadius: 3, cursor: 'pointer' }} />
+            </div>
+            <button className="figma-button figma-button-secondary" onClick={clearChat}
+              style={{ fontSize: 12, padding: '4px 12px' }}>清空对话</button>
+          </div>
         </div>
       </div>
 
@@ -311,7 +354,19 @@ export default function ChatPage() {
         <div 
           ref={messagesContainerRef}
           onScroll={handleScroll}
-          style={{ flex: '1 1 0', overflowY: 'auto', padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', minHeight: 0 }}
+          style={{ 
+            flex: '1 1 0', 
+            overflowY: 'auto', 
+            padding: 'var(--space-4)', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: 'var(--space-3)', 
+            minHeight: 0,
+            background: chatBg === 'default' ? 'var(--bg-primary)' : 
+                       chatBg.startsWith('#') ? chatBg : 
+                       chatBg.startsWith('http') || chatBg.startsWith('data:') ? `url(${chatBg}) center/cover` : 
+                       'var(--bg-primary)'
+          }}
         >
           {messages.length === 0 ? (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
@@ -341,19 +396,33 @@ export default function ChatPage() {
                     )}
                     <div style={{
                       maxWidth: '65%', padding: '10px 14px',
-                      borderRadius: msg.role === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
-                      background: msg.role === 'user' ? 'var(--figma-blue)' : 'var(--bg-tertiary)',
+                      borderRadius: '12px',
+                      background: msg.role === 'user' ? 'var(--figma-blue)' : aiMsgBgColor,
                       color: msg.role === 'user' ? '#ffffff' : 'var(--text-primary)',
                       border: msg.role === 'assistant' ? '1px solid var(--border-subtle)' : 'none',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                      position: 'relative'
                     }}>
+                      {/* 指向头像的三角形 */}
+                      <div style={{
+                        position: 'absolute',
+                        top: '12px',
+                        [msg.role === 'user' ? 'right' : 'left']: '-8px',
+                        width: 0,
+                        height: 0,
+                        borderStyle: 'solid',
+                        borderWidth: msg.role === 'user' ? '8px 0 8px 8px' : '8px 8px 8px 0',
+                        borderColor: msg.role === 'user' 
+                          ? 'transparent transparent transparent var(--figma-blue)'
+                          : `transparent ${aiMsgBgColor} transparent transparent`
+                      }} />
                       {msg.content && (
                         <div style={{
-                          fontSize: msg.textStyle?.fontSize ?? 14,
+                          fontSize: msg.role === 'user' ? (msg.textStyle?.fontSize ?? 14) : parseInt(aiMsgSize),
                           lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-                          color: msg.role === 'user' ? (msg.textStyle?.color ?? '#ffffff') : 'var(--text-primary)',
-                          fontFamily: msg.textStyle?.fontFamily || 'inherit',
-                          fontWeight: msg.textStyle?.isBold ? 700 : 400,
+                          color: msg.role === 'user' ? (msg.textStyle?.color ?? '#ffffff') : aiMsgColor,
+                          fontFamily: msg.role === 'user' ? (msg.textStyle?.fontFamily || 'inherit') : (aiMsgFont === '默认' ? 'inherit' : aiMsgFont),
+                          fontWeight: msg.role === 'user' ? (msg.textStyle?.isBold ? 700 : 400) : (aiMsgBold ? 700 : 400),
                         }}>
                           {msg.content}
                         </div>
@@ -511,10 +580,76 @@ export default function ChatPage() {
               {FONTS.map(f => <option key={f} value={f}>{f}</option>)}
             </select>
             {/* 颜色 */}
-            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              {COLORS.map(c => (
-                <div key={c} onClick={() => setTextColor(c)} style={{ width: 20, height: 20, borderRadius: '50%', background: c, cursor: 'pointer', border: textColor === c ? '2px solid var(--figma-blue)' : '1px solid var(--border-subtle)' }} />
-              ))}
+            <div style={{ position: 'relative' }}>
+              <button 
+                onClick={() => setShowColorPicker(v => !v)} 
+                title="文字颜色"
+                style={{ 
+                  background: 'none', 
+                  border: '1px solid var(--border-subtle)', 
+                  borderRadius: 4, 
+                  cursor: 'pointer', 
+                  padding: '4px 12px', 
+                  fontSize: 16,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4
+                }}
+              >
+                <div style={{ width: 16, height: 16, borderRadius: '50%', background: textColor, border: '1px solid var(--border-subtle)' }} />
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>▼</span>
+              </button>
+              {showColorPicker && (
+                <div style={{ 
+                  position: 'absolute', 
+                  bottom: 40, 
+                  left: 0, 
+                  background: 'var(--bg-secondary)', 
+                  border: '1px solid var(--border-subtle)', 
+                  borderRadius: 8, 
+                  padding: 12, 
+                  zIndex: 100, 
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+                  width: 200
+                }}>
+                  {/* 预设颜色 */}
+                  <div style={{ marginBottom: 8 }}>
+                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6 }}>预设颜色</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {COLORS.map(c => (
+                        <div 
+                          key={c} 
+                          onClick={() => { setTextColor(c); setShowColorPicker(false); }} 
+                          style={{ 
+                            width: 24, 
+                            height: 24, 
+                            borderRadius: '50%', 
+                            background: c, 
+                            cursor: 'pointer', 
+                            border: textColor === c ? '2px solid var(--figma-blue)' : '1px solid var(--border-subtle)' 
+                          }} 
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  {/* 自定义颜色 */}
+                  <div>
+                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6 }}>自定义颜色</div>
+                    <input 
+                      type="color" 
+                      value={textColor} 
+                      onChange={(e) => setTextColor(e.target.value)}
+                      style={{ 
+                        width: '100%', 
+                        height: 32, 
+                        border: '1px solid var(--border-subtle)', 
+                        borderRadius: 4,
+                        cursor: 'pointer'
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
             <div style={{ width: 1, height: 24, background: 'var(--border-subtle)' }} />
             {/* 表情 */}
@@ -527,6 +662,109 @@ export default function ChatPage() {
                   {EMOJIS.map(e => (
                     <span key={e} onClick={() => { insertAtCursor(e); setShowEmojiPicker(false); }} style={{ fontSize: 24, cursor: 'pointer', padding: 2, borderRadius: 4, lineHeight: 1 }}>{e}</span>
                   ))}
+                </div>
+              )}
+            </div>
+            {/* 背景设置 */}
+            <div style={{ position: 'relative' }}>
+              <button onClick={() => setShowBgPicker(v => !v)} title="聊天背景" style={{ background: showBgPicker ? 'var(--figma-blue)' : 'none', border: '1px solid var(--border-subtle)', borderRadius: 4, color: showBgPicker ? '#fff' : 'var(--text-secondary)', cursor: 'pointer', padding: '4px 12px', fontSize: 16 }}>
+                🖼️
+              </button>
+              {showBgPicker && (
+                <div style={{ 
+                  position: 'absolute', 
+                  bottom: 40, 
+                  left: 0, 
+                  background: 'var(--bg-secondary)', 
+                  border: '1px solid var(--border-subtle)', 
+                  borderRadius: 8, 
+                  padding: 12, 
+                  zIndex: 100, 
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+                  width: 220
+                }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 8 }}>聊天背景</div>
+                  {/* 预设背景 */}
+                  <div style={{ marginBottom: 10 }}>
+                    <button 
+                      onClick={() => { setChatBg('default'); setShowBgPicker(false); }}
+                      style={{ 
+                        width: '100%', 
+                        padding: '6px', 
+                        background: chatBg === 'default' ? 'var(--figma-blue)' : 'var(--bg-primary)', 
+                        border: '1px solid var(--border-subtle)', 
+                        borderRadius: 4, 
+                        color: chatBg === 'default' ? '#fff' : 'var(--text-secondary)', 
+                        cursor: 'pointer',
+                        fontSize: 12
+                      }}
+                    >
+                      默认背景
+                    </button>
+                  </div>
+                  {/* 纯色背景 */}
+                  <div style={{ marginBottom: 10 }}>
+                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6 }}>纯色背景</div>
+                    <input 
+                      type="color" 
+                      value={chatBg.startsWith('#') ? chatBg : '#1a1a1a'} 
+                      onChange={(e) => setChatBg(e.target.value)}
+                      style={{ 
+                        width: '100%', 
+                        height: 32, 
+                        border: '1px solid var(--border-subtle)', 
+                        borderRadius: 4,
+                        cursor: 'pointer'
+                      }}
+                    />
+                  </div>
+                  {/* 图片背景 */}
+                  <div>
+                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 6 }}>图片背景</div>
+                    <input 
+                      type="text" 
+                      placeholder="输入图片链接"
+                      value={chatBg.startsWith('http') || chatBg.startsWith('data:') ? chatBg : ''}
+                      onChange={(e) => setChatBg(e.target.value)}
+                      style={{ 
+                        width: '100%', 
+                        padding: '6px', 
+                        background: 'var(--bg-primary)', 
+                        border: '1px solid var(--border-subtle)', 
+                        borderRadius: 4,
+                        color: 'var(--text-primary)',
+                        fontSize: 12,
+                        marginBottom: 6
+                      }}
+                    />
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (ev) => {
+                            const result = ev.target?.result as string;
+                            console.log('Image loaded, size:', result.length);
+                            setChatBg(result);
+                            setShowBgPicker(false);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      style={{ 
+                        width: '100%', 
+                        padding: '6px', 
+                        background: 'var(--bg-primary)', 
+                        border: '1px solid var(--border-subtle)', 
+                        borderRadius: 4,
+                        color: 'var(--text-secondary)',
+                        fontSize: 11,
+                        cursor: 'pointer'
+                      }}
+                    />
+                  </div>
                 </div>
               )}
             </div>
