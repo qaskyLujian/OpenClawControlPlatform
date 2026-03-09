@@ -41,6 +41,17 @@ export default function TeamPage() {
     }
   };
 
+  const handleAgentControl = async (agentId: string, action: 'start' | 'stop' | 'restart') => {
+    try {
+      await api.post('/team/control', { agentId, action });
+      // 立即刷新状态
+      setTimeout(loadTeamData, 1000);
+    } catch (error) {
+      console.error(`Failed to ${action} agent ${agentId}:`, error);
+      alert(`操作失败: ${error}`);
+    }
+  };
+
   useEffect(() => {
     loadTeamData();
     const interval = setInterval(loadTeamData, 10000);
@@ -184,6 +195,70 @@ export default function TeamPage() {
                 whiteSpace: 'nowrap'
               }}>
                 📁 {agent.workspace}
+              </div>
+
+              {/* Control Buttons */}
+              <div style={{ 
+                marginTop: 16,
+                paddingTop: 16,
+                borderTop: '1px solid var(--border-subtle)',
+                display: 'flex',
+                gap: 8
+              }}>
+                {/* pm、dev 和 qa 有 systemd 服务 */}
+                {(agent.id === 'pm' || agent.id === 'dev' || agent.id === 'qa') ? (
+                  <>
+                    <button
+                      onClick={() => handleAgentControl(agent.id, 'start')}
+                      disabled={agent.online}
+                      className="figma-button figma-button-primary"
+                      style={{ 
+                        flex: 1,
+                        fontSize: 12,
+                        padding: '6px 12px',
+                        opacity: agent.online ? 0.5 : 1,
+                        cursor: agent.online ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      启动
+                    </button>
+                    <button
+                      onClick={() => handleAgentControl(agent.id, 'stop')}
+                      disabled={!agent.online}
+                      className="figma-button figma-button-secondary"
+                      style={{ 
+                        flex: 1,
+                        fontSize: 12,
+                        padding: '6px 12px',
+                        opacity: !agent.online ? 0.5 : 1,
+                        cursor: !agent.online ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      停止
+                    </button>
+                    <button
+                      onClick={() => handleAgentControl(agent.id, 'restart')}
+                      className="figma-button figma-button-secondary"
+                      style={{ 
+                        flex: 1,
+                        fontSize: 12,
+                        padding: '6px 12px'
+                      }}
+                    >
+                      重启
+                    </button>
+                  </>
+                ) : (
+                  <div style={{ 
+                    flex: 1,
+                    fontSize: 11,
+                    color: 'var(--text-tertiary)',
+                    textAlign: 'center',
+                    padding: '6px'
+                  }}>
+                    按需调用的 Agent（非后台服务）
+                  </div>
+                )}
               </div>
             </div>
           </Col>

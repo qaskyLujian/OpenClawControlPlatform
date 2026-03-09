@@ -80,6 +80,18 @@ function getSessionTokens(session: any): number {
   return input + output;
 }
 
+async function checkSystemdService(serviceName: string): Promise<boolean> {
+  try {
+    const { exec } = await import('child_process');
+    const { promisify } = await import('util');
+    const execAsync = promisify(exec);
+    const { stdout } = await execAsync(`systemctl is-active ${serviceName}.service`);
+    return stdout.trim() === 'active';
+  } catch {
+    return false;
+  }
+}
+
 async function getAgentStatus(agentConfig: typeof AGENTS[0]): Promise<AgentStatus> {
   const sessionsData = await readSessionsJson(agentConfig.sessionsPath);
   const sessions = Object.entries(sessionsData).map(([key, meta]) => ({ key, ...(meta as any) }));
@@ -101,7 +113,16 @@ async function getAgentStatus(agentConfig: typeof AGENTS[0]): Promise<AgentStatu
   });
 
   const latestSession = sessions[0];
-  const online = !!latestSession && (latestSession.updatedAt || 0) > fiveMinutesAgo;
+  
+  // 检查 systemd 服务状态（pm/dev/qa 有独立服务）
+  let online = !!latestSession && (latestSession.updatedAt || 0) > fiveMinutesAgo;
+  if (agentConfig.id === 'pm') {
+    online = await checkSystemdService('discord-bot0');
+  } else if (agentConfig.id === 'dev') {
+    online = await checkSystemdService('discord-bot1');
+  } else if (agentConfig.id === 'qa') {
+    online = await checkSystemdService('discord-bot2');
+  }
 
   return {
     id: agentConfig.id,
@@ -135,6 +156,48 @@ router.get('/', async (_req, res) => {
   } catch (error) {
     console.error('Team status error:', error);
     return res.status(500).json({ error: 'Failed to get team status' });
+  }
+});
+
+router.post('/control', async (req, res) => {
+  try {
+    const { agentId, action } = req.body;
+    
+    if (!agentId || !action) {
+      return res.status(400).json({ error: 'Missing agentId or action' });
+    }
+
+    if (!['start', 'stop', 'restart'].includes(action)) {
+      return res.status(400).json({ error: 'Invalid action' });
+    }
+
+    // 映射 agentId 到 systemd 服务名
+    const serviceMap: Record<string, string> = {
+      'pm': 'discord-bot0',
+      'dev': 'discord-bot1',
+      'qa': 'discord-bot2'
+    };
+
+    const serviceName = serviceMap[agentId];
+    if (!serviceName) {
+      return res.status(400).json({ error: `Agent ${agentId} does not have a systemd service` });
+    }
+
+    // 执行 systemctl 命令
+    const { exec } = await import('child_process');
+    const { promisify } = await import('util');
+    const execAsync = promisify(exec);
+
+    const command = `systemctl ${action} ${serviceName}.service`;
+    await execAsync(command);
+
+    // 清除缓存，强制刷新
+    teamCache = null;
+
+    return res.json({ success: true, message: `${action} ${serviceName} successfully` });
+  } catch (error) {
+    console.error('Control error:', error);
+    return res.status(500).json({ error: `Failed to ${req.body.action} agent` });
   }
 });
 

@@ -24,7 +24,7 @@ interface Message {
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(() => localStorage.getItem('chat_draft') || '');
   const [loading, setLoading] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [lastSync, setLastSync] = useState(0);
@@ -43,6 +43,11 @@ export default function ChatPage() {
   const [showBgPicker, setShowBgPicker] = useState(false);
   const [chatBg, setChatBgRaw] = useState(() => localStorage.getItem('chat_bg') || 'default');
   const setChatBg = (v: string) => { localStorage.setItem('chat_bg', v); setChatBgRaw(v); };
+  
+  // 保存草稿到 localStorage
+  useEffect(() => {
+    localStorage.setItem('chat_draft', input);
+  }, [input]);
   
   // AI 消息样式
   const [aiMsgBold, setAiMsgBoldRaw] = useState(() => localStorage.getItem('ai_msg_bold') === 'true');
@@ -76,6 +81,19 @@ export default function ChatPage() {
     cache[key] = style;
     console.log('saveMessageStyle:', key, style);
     localStorage.setItem('chat_message_styles', JSON.stringify(cache));
+  };
+
+  const saveMessageFiles = (msg: Message, files: ChatFile[]) => {
+    const cache = JSON.parse(localStorage.getItem('chat_message_files') || '{}');
+    const key = getMessageKey(msg);
+    cache[key] = files;
+    localStorage.setItem('chat_message_files', JSON.stringify(cache));
+  };
+
+  const getMessageFiles = (msg: Message): ChatFile[] | undefined => {
+    const cache = JSON.parse(localStorage.getItem('chat_message_files') || '{}');
+    const key = getMessageKey(msg);
+    return cache[key];
   };
 
   const getMessageStyle = (msg: Message) => {
@@ -140,13 +158,24 @@ export default function ChatPage() {
         if (!resp.ok) return;
         const data = await resp.json();
         if (data.messages && Array.isArray(data.messages)) {
-          // 恢复消息样式
+          // 恢复消息样式和文件信息
           const messagesWithStyle = data.messages.map((msg: Message) => {
             const savedStyle = getMessageStyle(msg);
-            if (savedStyle) {
-              return { ...msg, textStyle: savedStyle };
-            }
-            return msg;
+            const savedFiles = getMessageFiles(msg);
+            
+            // 查找当前消息列表中是否已有此消息（通过时间戳匹配，允许1秒误差）
+            const existingMsg = messages.find(m => Math.abs(m.timestamp - msg.timestamp) < 1000);
+            
+            // 如果当前消息有文件（包含本地预览），优先使用当前的
+            const finalFiles = existingMsg?.files || savedFiles || msg.files;
+            
+            console.log('同步消息:', msg.content.slice(0, 30), '找到现有消息:', !!existingMsg, '文件数:', finalFiles?.length);
+            
+            return { 
+              ...msg, 
+              textStyle: savedStyle || msg.textStyle,
+              files: finalFiles
+            };
           });
           setMessages(messagesWithStyle);
           setLastSync(Date.now());
@@ -165,12 +194,28 @@ export default function ChatPage() {
     const rawContent = input.trim();
     if ((!rawContent && pendingFiles.length === 0) || loading) return;
 
+    // 为图片文件创建本地预览 URL
+    const filesWithPreview = pendingFiles.map(f => {
+      const isImage = f.type.startsWith('image/');
+      const preview = {
+        name: f.name,
+        path: isImage ? URL.createObjectURL(f) : '',  // 图片使用本地 URL
+        size: f.size,
+        type: f.type,
+        isLocalPreview: isImage  // 标记为本地预览
+      };
+      console.log('文件预览:', f.name, f.type, 'isImage:', isImage, 'path:', preview.path);
+      return preview;
+    });
+
+    console.log('filesWithPreview:', filesWithPreview);
+
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: rawContent,
       timestamp: Date.now(),
-      files: pendingFiles.map(f => ({ name: f.name, path: '', size: f.size, type: f.type })),
+      files: filesWithPreview,
       textStyle: { fontSize: parseInt(fontSize), color: textColor, fontFamily: fontFamily === '默认' ? undefined : fontFamily, isBold }
     };
 
@@ -203,6 +248,21 @@ export default function ChatPage() {
 
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error || '请求失败');
+
+      console.log('后端响应:', data);
+      console.log('uploadedFiles:', data.uploadedFiles);
+
+      // 更新用户消息的文件路径
+      if (data.uploadedFiles && data.uploadedFiles.length > 0) {
+        console.log('更新用户消息文件:', userMessage.id, data.uploadedFiles);
+        setMessages(prev => prev.map(msg => 
+          msg.id === userMessage.id 
+            ? { ...msg, files: data.uploadedFiles }
+            : msg
+        ));
+        // 保存文件信息到 localStorage
+        saveMessageFiles(userMessage, data.uploadedFiles);
+      }
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -286,8 +346,9 @@ export default function ChatPage() {
     return (
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
         {images.map((f, i) => (
-          <a key={i} href={getFileUrl(f.path)} target="_blank" rel="noreferrer">
-            <img src={getFileUrl(f.path)} alt={f.name}
+          <a key={i} href={(f as any).isLocalPreview ? undefined : getFileUrl(f.path)} target="_blank" rel="noreferrer" 
+             style={{ cursor: (f as any).isLocalPreview ? 'default' : 'pointer' }}>
+            <img src={(f as any).isLocalPreview ? f.path : getFileUrl(f.path)} alt={f.name}
               style={{ maxWidth: 300, maxHeight: 200, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
@@ -427,7 +488,12 @@ export default function ChatPage() {
                           {msg.content}
                         </div>
                       )}
-                      {msg.files && msg.files.length > 0 && renderFiles(msg.files)}
+                      {msg.files && msg.files.length > 0 && (
+                        <>
+                          {renderFiles(msg.files)}
+                          {renderImagePreview(msg.files)}
+                        </>
+                      )}
                       {msg.outputFiles && msg.outputFiles.length > 0 && (
                         <>
                           {renderFiles(msg.outputFiles, true)}

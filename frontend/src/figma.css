@@ -156,6 +156,8 @@ body {
 
 .figma-panel-body {
   padding: var(--space-4);
+  overflow: auto;
+  max-height: calc(100vh - 300px);
 }
 
 /* Figma Badge */
@@ -371,6 +373,18 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* 侧边面板滑入动画 */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 

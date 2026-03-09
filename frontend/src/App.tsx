@@ -91,8 +91,7 @@ function App() {
       display: 'flex',
       width: '100vw',
       height: '100vh',
-      background: 'var(--bg-primary)',
-      overflow: 'hidden'
+      background: 'var(--bg-primary)'
     }}>
       {/* Sidebar */}
       <Sidebar 
@@ -107,7 +106,7 @@ function App() {
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        overflow: 'hidden',
+        overflow: 'auto',
         width: 'calc(100vw - 240px)'
       }}>
         {/* Toolbar */}
@@ -130,12 +129,16 @@ function App() {
         {/* Page Content */}
         <div style={{
           flex: 1,
-          overflow: currentPage === 'chat' ? 'hidden' : 'auto',
+          overflow: 'auto',
           padding: currentPage === 'chat' ? 0 : 'var(--space-4)',
           width: '100%',
-          boxSizing: 'border-box'
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column'
         }}>
-          <div className="fade-in-up" style={currentPage === 'chat' ? { height: '100%', display: 'flex', flexDirection: 'column' } : undefined}>
+          <div className="fade-in-up" style={{ 
+            ...(currentPage === 'chat' ? { height: '100%', display: 'flex', flexDirection: 'column' } : {})
+          }}>
             {renderPage()}
           </div>
         </div>

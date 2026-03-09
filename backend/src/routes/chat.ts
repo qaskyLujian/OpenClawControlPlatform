@@ -11,6 +11,26 @@ const execAsync = promisify(exec);
 const OPENCLAW = path.join(os.homedir(), '.nvm/versions/node/v22.22.0/bin/openclaw');
 const ENV = { ...process.env, PATH: `${os.homedir()}/.nvm/versions/node/v22.22.0/bin:${process.env.PATH}` };
 
+// 消息去重缓存
+const messageCache = new Map<string, { timestamp: number; response: any }>();
+const MESSAGE_CACHE_TTL = 60000; // 60秒内的重复消息会被过滤
+
+// 清理过期缓存
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of messageCache.entries()) {
+    if (now - value.timestamp > MESSAGE_CACHE_TTL) {
+      messageCache.delete(key);
+    }
+  }
+}, 30000); // 每30秒清理一次
+
+// 生成消息指纹
+function getMessageFingerprint(message: string, files: any[]): string {
+  const fileInfo = files.map(f => `${f.originalname}:${f.size}`).join(',');
+  return `${message}:${fileInfo}`;
+}
+
 // 动态获取主会话 ID（和 TUI/Telegram/WhatsApp 共享）
 async function getMainSessionId(): Promise<string> {
   const sessionsPath = path.join(os.homedir(), '.openclaw', 'agents', 'main', 'sessions', 'sessions.json');
@@ -74,6 +94,16 @@ router.post('/', upload.array('files', 5), async (req: any, res) => {
 
     if (!message && files.length === 0) {
       return res.status(400).json({ error: '请输入消息或上传文件' });
+    }
+
+    // 检查消息去重（有文件上传时不使用缓存）
+    const fingerprint = getMessageFingerprint(message || '', files);
+    if (files.length === 0) {
+      const cached = messageCache.get(fingerprint);
+      if (cached && Date.now() - cached.timestamp < MESSAGE_CACHE_TTL) {
+        console.log('[Chat] Duplicate message detected, returning cached response');
+        return res.json(cached.response);
+      }
     }
 
     // 构建消息内容
@@ -148,11 +178,19 @@ router.post('/', upload.array('files', 5), async (req: any, res) => {
       }
     }
 
-    res.json({
+    const response = {
       reply: reply.trim(),
       uploadedFiles: uploadedFiles.length > 0 ? uploadedFiles : undefined,
       outputFiles: validFiles.length > 0 ? validFiles : undefined
-    });
+    };
+
+    console.log('[Chat] Response:', JSON.stringify(response, null, 2));
+    console.log('[Chat] uploadedFiles count:', uploadedFiles.length);
+
+    // 缓存响应
+    messageCache.set(fingerprint, { timestamp: Date.now(), response });
+
+    res.json(response);
   } catch (error: any) {
     console.error('[Chat] Error:', error.message);
     if (error.killed) return res.status(504).json({ error: 'AI 响应超时' });

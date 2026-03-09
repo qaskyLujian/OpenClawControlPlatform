@@ -42,20 +42,31 @@ export default function SessionsPage() {
     isolated: '隔离会话'
   };
 
+  // 完全禁用搜索框的 focus 滚动行为
+  const preventScroll = (e: React.FocusEvent | React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('[SessionsPage] Scroll prevented');
+  };
+
   return (
-    <div>
+    <div style={{ overflow: 'hidden' }}>
       {/* Header */}
       <div style={{
         marginBottom: 16,
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        overflow: 'hidden'
       }}>
         <Input
           placeholder="搜索会话..."
           prefix={<SearchOutlined style={{ color: 'var(--text-tertiary)' }} />}
           className="figma-input"
           style={{ width: 300 }}
+          onFocus={preventScroll}
+          onClick={preventScroll}
+          onMouseDown={preventScroll}
         />
       </div>
 
@@ -82,15 +93,24 @@ export default function SessionsPage() {
       </Row>
 
       {/* Sessions List */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, overflow: 'hidden' }}>
         {sessions.map(session => (
-          <div key={session.key} className="figma-card" style={{ padding: 'var(--space-4)' }}>
+          <div 
+            key={session.key} 
+            className="figma-card" 
+            style={{ padding: 'var(--space-4)', cursor: 'default', userSelect: 'none' }}
+            onClick={preventScroll}
+            onMouseDown={preventScroll}
+          >
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'flex-start',
               marginBottom: 'var(--space-3)'
-            }}>
+            }}
+            onClick={preventScroll}
+            onMouseDown={preventScroll}
+            >
               <div style={{ flex: 1 }}>
                 <div style={{
                   display: 'flex',

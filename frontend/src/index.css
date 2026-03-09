@@ -73,6 +73,12 @@ button:focus-visible {
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
+/* 禁止自动滚动行为 */
+html, body {
+  overflow-anchor: none;
+  scroll-behavior: auto !important;
+}
+
 *::-webkit-scrollbar {
   width: 8px;
   height: 8px;

@@ -566,7 +566,13 @@ export default function ManagePage() {
       // 后端返回的是从新到旧，前端反转让最新消息在底部
       setChatMessages((res.data.messages || []).reverse());
       setChatTotal(res.data.total || 0);
-      setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+      // 修复：只在消息面板内部滚动，不触发页面滚动
+      setTimeout(() => {
+        const chatContainer = document.querySelector('.chat-messages-container');
+        if (chatContainer) {
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+      }, 100);
     } catch {
       message.error('加载消息失败');
     } finally {
@@ -661,6 +667,17 @@ export default function ManagePage() {
     return getAgentDisplayName(raw);
   };
 
+  // 当会话列表变化时，自动显示第一个会话的历史信息
+  useEffect(() => {
+    if (!loading && sessions.length > 0 && filteredSessions.length > 0) {
+      // 如果当前没有查看会话，或者当前查看的会话不在过滤后的列表中
+      const currentStillValid = viewingSession && filteredSessions.find(s => s.key === viewingSession.key);
+      if (!viewingSession || !currentStillValid) {
+        handleViewSession(filteredSessions[0]);
+      }
+    }
+  }, [loading, sessions, channelFilter]);
+
   // 过滤会话
   const sessionChannels = [...new Set(sessions.flatMap(s => s.channels || [s.channel]))];
   const filteredSessions = sessions.filter(s => {
@@ -682,38 +699,43 @@ export default function ManagePage() {
   return (
     <div className="content-container">
       {/* 会话管理 */}
-      <div className="figma-panel" style={{ marginBottom: 24 }}>
-        <div className="figma-panel-header" style={{ 
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ 
+          padding: '16px 20px',
           background: 'linear-gradient(135deg, rgba(240, 160, 32, 0.12) 0%, rgba(240, 160, 32, 0.04) 100%)',
-          borderBottom: '1px solid rgba(240, 160, 32, 0.2)'
+          borderBottom: '1px solid rgba(240, 160, 32, 0.2)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderRadius: '8px 8px 0 0'
         }}>
-          <div className="figma-panel-title">
-            <MessageOutlined style={{ marginRight: 8, color: '#f0a020' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 500, fontSize: 15 }}>
+            <MessageOutlined style={{ color: '#f0a020' }} />
             会话管理
           </div>
-          <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
-            <span className="figma-badge figma-badge-blue">{sessions.length} 个</span>
-            <span className="figma-badge figma-badge-green">{sessions.filter(s => s.active).length} 活跃</span>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <span style={{ padding: '4px 12px', background: 'rgba(32,128,240,0.1)', color: '#2080f0', borderRadius: 12, fontSize: 12 }}>{sessions.length} 个</span>
+            <span style={{ padding: '4px 12px', background: 'rgba(32,200,80,0.1)', color: '#20c850', borderRadius: 12, fontSize: 12 }}>{sessions.filter(s => s.active).length} 活跃</span>
           </div>
         </div>
-        <div className="figma-panel-body">
+        <div style={{ padding: 20, background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderTop: 'none', borderRadius: '0 0 8px 8px' }}>
           {/* 搜索和筛选 */}
-          <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-3)' }}>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
             <Input size="small" prefix={<SearchOutlined style={{ color: 'var(--text-tertiary)' }} />}
               placeholder="搜索会话..." value={sessionSearch}
               onChange={e => setSessionSearch(e.target.value)}
               style={{ flex: 1, background: 'var(--bg-primary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }} />
             <select value={channelFilter} onChange={e => setChannelFilter(e.target.value)}
-              style={{ padding: '2px 8px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: 15 }}>
+              style={{ padding: '6px 12px', background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 6, color: 'var(--text-primary)', fontSize: 14, minWidth: 140 }}>
               <option value="all">全部渠道</option>
               {sessionChannels.map(ch => <option key={ch} value={ch}>{ch}</option>)}
             </select>
           </div>
 
           <Row gutter={[12, 0]}>
-            {/* 会话列表 */}
-            <Col span={viewingSession ? 10 : 24}>
-              <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+            {/* 会话列表 - 左侧 35% */}
+            <Col span={8}>
+              <div style={{ height: 380, overflowY: 'auto', overflowX: 'hidden', border: '1px solid var(--border-subtle)', borderRadius: 6 }}>
                 {filteredSessions.length === 0 ? (
                   <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 30, fontSize: 15 }}>暂无会话</div>
                 ) : filteredSessions.map((session) => (
@@ -721,7 +743,7 @@ export default function ManagePage() {
                     padding: 'var(--space-2) var(--space-3)', marginBottom: 6, cursor: 'pointer',
                     border: viewingSession?.key === session.key ? '1px solid var(--figma-blue)' : '1px solid var(--border-subtle)',
                     position: 'relative', overflow: 'hidden'
-                  }} onClick={() => handleViewSession(session)}>
+                  }} onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleViewSession(session); }}>
                     {session.active && (
                       <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: 'var(--figma-green)', animation: 'pulse 2s ease-in-out infinite' }} />
                     )}
@@ -769,10 +791,10 @@ export default function ManagePage() {
               </div>
             </Col>
 
-            {/* 消息回放面板 */}
+            {/* 消息回放面板 - 右侧 65% */}
             {viewingSession && (
-              <Col span={14}>
-                <div style={{ background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', height: 400, display: 'flex', flexDirection: 'column' }}>
+              <Col span={16}>
+                <div style={{ background: 'var(--bg-tertiary)', borderRadius: 6, border: '1px solid var(--border-subtle)', height: 380, display: 'flex', flexDirection: 'column' }}>
                   {/* 头部 */}
                   <div style={{ padding: 'var(--space-2) var(--space-3)', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -803,7 +825,7 @@ export default function ManagePage() {
                     </div>
                   </div>
                   {/* 消息列表 */}
-                  <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--space-2) var(--space-3)' }}>
+                  <div className="chat-messages-container" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: 'var(--space-2) var(--space-3)' }}>
                     {chatLoading && chatMessages.length === 0 ? (
                       <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 40, fontSize: 15 }}>加载中...</div>
                     ) : chatMessages.length === 0 ? (
