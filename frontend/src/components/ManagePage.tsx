@@ -667,16 +667,7 @@ export default function ManagePage() {
     return getAgentDisplayName(raw);
   };
 
-  // 当会话列表变化时，自动显示第一个会话的历史信息
-  useEffect(() => {
-    if (!loading && sessions.length > 0 && filteredSessions.length > 0) {
-      // 如果当前没有查看会话，或者当前查看的会话不在过滤后的列表中
-      const currentStillValid = viewingSession && filteredSessions.find(s => s.key === viewingSession.key);
-      if (!viewingSession || !currentStillValid) {
-        handleViewSession(filteredSessions[0]);
-      }
-    }
-  }, [loading, sessions, channelFilter]);
+  // 不再自动加载第一个会话，让用户手动点击
 
   // 过滤会话
   const sessionChannels = [...new Set(sessions.flatMap(s => s.channels || [s.channel]))];
@@ -733,8 +724,8 @@ export default function ManagePage() {
           </div>
 
           <Row gutter={[12, 0]}>
-            {/* 会话列表 - 左侧 35% */}
-            <Col span={8}>
+            {/* 会话列表 - 默认占满全宽 */}
+            <Col span={viewingSession ? 12 : 24}>
               <div style={{ height: 380, overflowY: 'auto', overflowX: 'hidden', border: '1px solid var(--border-subtle)', borderRadius: 6 }}>
                 {filteredSessions.length === 0 ? (
                   <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: 30, fontSize: 15 }}>暂无会话</div>
@@ -791,9 +782,9 @@ export default function ManagePage() {
               </div>
             </Col>
 
-            {/* 消息回放面板 - 右侧 65% */}
+            {/* 消息回放面板 - 点击会话后才显示 */}
             {viewingSession && (
-              <Col span={16}>
+              <Col span={12}>
                 <div style={{ background: 'var(--bg-tertiary)', borderRadius: 6, border: '1px solid var(--border-subtle)', height: 380, display: 'flex', flexDirection: 'column' }}>
                   {/* 头部 */}
                   <div style={{ padding: 'var(--space-2) var(--space-3)', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
