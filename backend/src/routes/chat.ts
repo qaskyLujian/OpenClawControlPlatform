@@ -479,12 +479,15 @@ router.get('/history', async (req, res) => {
               .map((c: any) => c.text)
               .join('\n');
           }
-          if (content.trim()) {
+          // 有内容或有文件的消息都要返回
+          const hasFiles = msg.files && Array.isArray(msg.files) && msg.files.length > 0;
+          if (content.trim() || hasFiles) {
             messages.push({
               id: entry.id || `${entry.timestamp || Date.now()}`,
               role: msg.role,
               content: cleanMessageContent(content),
-              timestamp: new Date(entry.timestamp || Date.now()).getTime()
+              timestamp: new Date(entry.timestamp || Date.now()).getTime(),
+              files: msg.files || []
             });
           }
         }

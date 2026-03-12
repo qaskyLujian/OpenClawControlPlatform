@@ -14,6 +14,7 @@ import whatsappRouter from './routes/whatsapp';
 import chatRouter from './routes/chat';
 import teamRouter from './routes/team';
 import systemRouter from './routes/system';
+import uploadRouter from './routes/upload';
 
 const app = express();
 const httpServer = createServer(app);
@@ -47,6 +48,9 @@ app.use(express.static(path.join(__dirname, '../dist-frontend'), {
   }
 }));
 
+// Serve uploaded images
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Simple auth middleware
 const AUTH_TOKEN = process.env.ADMIN_TOKEN || 'wj12345';
 app.use((req, res, next) => {
@@ -78,6 +82,7 @@ app.use('/api/whatsapp', whatsappRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/team', teamRouter);
 app.use('/api/system', systemRouter);
+app.use('/api/upload', uploadRouter);
 
 // WebSocket
 io.on('connection', (socket) => {

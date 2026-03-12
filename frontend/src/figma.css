@@ -2,10 +2,11 @@
 
 :root {
   /* Colors */
-  --bg-primary: #0d0d0d;
-  --bg-secondary: #1e1e1e;
+  --bg-primary: transparent;
+  --bg-secondary: rgba(30, 30, 30, 0.9);
   --bg-tertiary: #2c2c2c;
   --bg-hover: rgba(255, 255, 255, 0.05);
+  --sidebar-bg: transparent;
   
   --text-primary: #ffffff;
   --text-secondary: #cccccc;
@@ -39,10 +40,11 @@
 
 /* Light Theme */
 [data-theme="light"] {
-  --bg-primary: #f7f8fa;
-  --bg-secondary: rgba(255, 255, 255, 0.85);
+  --bg-primary: transparent;
+  --bg-secondary: rgba(255, 255, 255, 0.9);
   --bg-tertiary: rgba(0, 0, 0, 0.04);
   --bg-hover: rgba(0, 0, 0, 0.06);
+  --sidebar-bg: transparent;
 
   --text-primary: #111111;
   --text-secondary: #3d3d3d;
@@ -293,7 +295,7 @@ body {
 /* Figma Sidebar */
 .figma-sidebar {
   width: 240px;
-  background: var(--bg-primary);
+  background: var(--sidebar-bg);
   border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
@@ -634,4 +636,11 @@ body {
 .chat-textarea.bold-mode,
 .chat-textarea.bold-mode * {
   font-weight: 700 !important;
+}
+
+/* 楷体加粗时使用文字阴影模拟粗体效果 */
+.chat-textarea.bold-mode[style*="楷体"],
+.chat-textarea.bold-mode[style*="楷体"] * {
+  text-shadow: 0.5px 0 0 currentColor, -0.5px 0 0 currentColor,
+               0 0.5px 0 currentColor, 0 -0.5px 0 currentColor;
 }
