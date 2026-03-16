@@ -3,8 +3,6 @@ import {
   SettingOutlined,
   MessageOutlined,
   TeamOutlined,
-  SunOutlined,
-  MoonOutlined,
 } from '@ant-design/icons';
 
 interface SidebarProps {
@@ -12,9 +10,10 @@ interface SidebarProps {
   onPageChange: (page: string) => void;
   theme: 'dark' | 'light';
   onToggleTheme: () => void;
+  setShowThemePanel: (show: boolean) => void;
 }
 
-export default function Sidebar({ currentPage, onPageChange, theme, onToggleTheme }: SidebarProps) {
+export default function Sidebar({ currentPage, onPageChange, setShowThemePanel }: SidebarProps) {
   const menuItems = [
     {
       key: 'monitor',
@@ -66,7 +65,7 @@ export default function Sidebar({ currentPage, onPageChange, theme, onToggleThem
               color: 'var(--text-primary)',
               letterSpacing: '0.5px'
             }}>
-              OpenClaw管控中心
+              小汐 AI
             </div>
           </div>
         </div>
@@ -86,20 +85,19 @@ export default function Sidebar({ currentPage, onPageChange, theme, onToggleThem
         ))}
       </div>
 
-      {/* Theme Toggle */}
+      {/* Theme Settings */}
       <div style={{ padding: 'var(--space-3) var(--space-4)', borderTop: '1px solid var(--border-subtle)' }}>
         <div
           className="figma-sidebar-item"
-          onClick={onToggleTheme}
+          onClick={() => setShowThemePanel(true)}
           style={{ marginBottom: 0 }}
         >
           <span className="figma-sidebar-item-icon">
-            {theme === 'dark' ? <SunOutlined /> : <MoonOutlined />}
+            <SettingOutlined />
           </span>
-          <span>{theme === 'dark' ? '切换白天' : '切换黑夜'}</span>
+          <span>主题设置</span>
         </div>
       </div>
     </div>
   );
 }
-

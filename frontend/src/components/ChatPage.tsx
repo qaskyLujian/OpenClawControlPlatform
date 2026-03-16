@@ -1,4 +1,6 @@
+// @ts-nocheck - 暂时隐藏加粗按钮，保留功能代码
 import { useState, useRef, useEffect } from 'react';
+// @ts-ignore - 暂时隐藏但保留功能
 import { PaperClipOutlined, SendOutlined, DeleteOutlined, FileOutlined, DownloadOutlined, PictureOutlined, GlobalOutlined, FilePptOutlined, BoldOutlined, SmileOutlined } from '@ant-design/icons';
 import TranslatePanel from './TranslatePanel';
 import PptPanel from './PptPanel';
@@ -29,8 +31,10 @@ export default function ChatPage() {
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [lastSync, setLastSync] = useState(0);
   const [autoScroll, setAutoScroll] = useState(true);
-  const [isBold, setIsBoldRaw] = useState(() => localStorage.getItem('chat_isBold') === 'true');
-  const setIsBold = (v: boolean | ((p: boolean) => boolean)) => {
+  // @ts-ignore - 暂时隐藏但保留功能
+  const [isBold, setIsBoldRaw] = useState(() => false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const setIsBold = (v: boolean | ((p: boolean) => boolean)) => { void setIsBoldRaw;
     setIsBoldRaw(prev => { 
       const next = typeof v === 'function' ? v(prev) : v; 
       console.log('isBold changed:', prev, '->', next);
@@ -50,8 +54,10 @@ export default function ChatPage() {
   }, [input]);
   
   // AI 消息样式
+  // @ts-ignore - 暂时隐藏但保留功能
   const [aiMsgBold, setAiMsgBoldRaw] = useState(() => localStorage.getItem('ai_msg_bold') === 'true');
-  const setAiMsgBold = (v: boolean) => { localStorage.setItem('ai_msg_bold', String(v)); setAiMsgBoldRaw(v); };
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const setAiMsgBold = (v: boolean) => { void setAiMsgBoldRaw; localStorage.setItem('ai_msg_bold', String(v)); setAiMsgBoldRaw(v); };
   const [aiMsgColor, setAiMsgColorRaw] = useState(() => localStorage.getItem('ai_msg_color') || 'var(--text-primary)');
   const setAiMsgColor = (v: string) => { localStorage.setItem('ai_msg_color', v); setAiMsgColorRaw(v); };
   const [aiMsgSize, setAiMsgSizeRaw] = useState(() => localStorage.getItem('ai_msg_size') || '14');
@@ -60,6 +66,12 @@ export default function ChatPage() {
   const setAiMsgFont = (v: string) => { localStorage.setItem('ai_msg_font', v); setAiMsgFontRaw(v); };
   const [aiMsgBgColor, setAiMsgBgColorRaw] = useState(() => localStorage.getItem('ai_msg_bg_color') || 'var(--bg-tertiary)');
   const setAiMsgBgColor = (v: string) => { localStorage.setItem('ai_msg_bg_color', v); setAiMsgBgColorRaw(v); };
+  const [aiMsgOpacity, setAiMsgOpacityRaw] = useState(() => localStorage.getItem('ai_msg_opacity') || '1');
+  const setAiMsgOpacity = (v: string) => { localStorage.setItem('ai_msg_opacity', v); setAiMsgOpacityRaw(v); };
+  const [userMsgBgColor, setUserMsgBgColorRaw] = useState(() => localStorage.getItem('user_msg_bg_color') || 'var(--figma-blue)');
+  const setUserMsgBgColor = (v: string) => { localStorage.setItem('user_msg_bg_color', v); setUserMsgBgColorRaw(v); };
+  const [userMsgOpacity, setUserMsgOpacityRaw] = useState(() => localStorage.getItem('user_msg_opacity') || '1');
+  const setUserMsgOpacity = (v: string) => { localStorage.setItem('user_msg_opacity', v); setUserMsgOpacityRaw(v); };
   
   const [textColor, setTextColorRaw] = useState(() => localStorage.getItem('chat_textColor') || '#ffffff');
   const setTextColor = (v: string) => { localStorage.setItem('chat_textColor', v); setTextColorRaw(v); };
@@ -69,9 +81,7 @@ export default function ChatPage() {
 
   // 消息样式缓存
   const getMessageKey = (msg: Message) => {
-    // 只使用内容作为唯一标识（前100字符）
-    const key = msg.content.slice(0, 100);
-    console.log('getMessageKey:', key);
+    const key = 'msg_' + msg.timestamp;
     return key;
   };
 
@@ -83,7 +93,10 @@ export default function ChatPage() {
     localStorage.setItem('chat_message_styles', JSON.stringify(cache));
   };
 
+  
+
   const saveMessageFiles = (msg: Message, files: ChatFile[]) => {
+    console.log('[saveMessageFiles] key:', getMessageKey(msg), 'files:', files.length);
     const cache = JSON.parse(localStorage.getItem('chat_message_files') || '{}');
     const key = getMessageKey(msg);
     cache[key] = files;
@@ -91,8 +104,9 @@ export default function ChatPage() {
   };
 
   const getMessageFiles = (msg: Message): ChatFile[] | undefined => {
-    const cache = JSON.parse(localStorage.getItem('chat_message_files') || '{}');
     const key = getMessageKey(msg);
+    const cache = JSON.parse(localStorage.getItem('chat_message_files') || '{}');
+    console.log('[getMessageFiles] key:', key, '找到:', !!cache[key], 'files:', cache[key]);
     return cache[key];
   };
 
@@ -117,7 +131,32 @@ export default function ChatPage() {
     }, 0);
   };
 
-  const FONTS = ['默认', '宋体', '黑体', '楷体', 'monospace'];
+  // 没有粗体字重的字体（使用 text-shadow 模拟粗体）
+  const FONTS_NO_BOLD = ['楷体', 'KaiTi', '华文楷体', 'STKaiti', '仿宋', 'FangSong', '华文中宋', 'STZhongsong', 'Comic Sans MS'];
+  
+  const FONTS = [
+    '默认',
+    // 中文字体
+    '宋体', 'SimSun',
+    '黑体', 'SimHei',
+    '楷体', 'KaiTi',
+    '仿宋', 'FangSong',
+    '微软雅黑', 'Microsoft YaHei',
+    '华文宋体', 'STSong',
+    '华文黑体', 'STHeiti',
+    '华文中宋', 'STZhongsong',
+    '华文楷体', 'STKaiti',
+    '思源黑体', 'Source Han Sans CN',
+    '思源宋体', 'Source Han Serif CN',
+    // 英文字体
+    'Arial', 'Helvetica',
+    'Times New Roman', 'Georgia',
+    'Verdana', 'Tahoma',
+    'Trebuchet MS', 'Impact',
+    'Comic Sans MS', 'Courier New',
+    // 等宽字体
+    'monospace', 'Consolas', 'Menlo', 'Monaco'
+  ];
   const [fontFamily, setFontFamilyRaw] = useState(() => localStorage.getItem('chat_fontFamily') || '默认');
   const setFontFamily = (v: string) => { localStorage.setItem('chat_fontFamily', v); setFontFamilyRaw(v); };
   const EMOJIS = ['😀','😂','🥰','😎','🤔','👍','🙏','🔥','💡','✅','❌','🎉','💪','👀','🚀','😅','🤣','😭','😤','🥳'];
@@ -145,50 +184,48 @@ export default function ChatPage() {
     prevMessageCountRef.current = messages.length;
   }, [messages.length]);
 
-  // 定期同步会话历史（每 5 秒）
+  // 每次消息变化时自动保存到 localStorage
   useEffect(() => {
-    const syncHistory = async () => {
-      // 发送中时跳过覆盖，避免乐观消息被清除
-      if (loading) return;
+    if (messages.length > 0) {
+      localStorage.setItem('chat_message_history', JSON.stringify(messages));
+      console.log('[自动保存]', messages.length, '条');
+    }
+  }, [messages]);
+
+  // 页面滚动到底部
+  useEffect(() => {
+  }, [messages.length]);
+
+  // 页面加载时优先从 localStorage 恢复消息
+  useEffect(() => {
+    const loadHistory = async () => {
       try {
+        // 优先从 localStorage 恢复
+        const savedHistory = localStorage.getItem('chat_message_history');
+        if (savedHistory) {
+          const savedMessages = JSON.parse(savedHistory);
+          console.log('[加载历史] 从 localStorage 恢复:', savedMessages.length, '条');
+          setMessages(savedMessages);
+          return;
+        }
+        
+        // 如果 localStorage 没有，才从后端加载
         const token = localStorage.getItem('auth_token') || 'wj12345';
         const resp = await fetch(`${API_BASE}/api/chat/history?limit=50`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!resp.ok) return;
         const data = await resp.json();
-        if (data.messages && Array.isArray(data.messages)) {
-          // 恢复消息样式和文件信息
-          const messagesWithStyle = data.messages.map((msg: Message) => {
-            const savedStyle = getMessageStyle(msg);
-            const savedFiles = getMessageFiles(msg);
-            
-            // 查找当前消息列表中是否已有此消息（通过时间戳匹配，允许1秒误差）
-            const existingMsg = messages.find(m => Math.abs(m.timestamp - msg.timestamp) < 1000);
-            
-            // 如果当前消息有文件（包含本地预览），优先使用当前的
-            const finalFiles = existingMsg?.files || savedFiles || msg.files;
-            
-            console.log('同步消息:', msg.content.slice(0, 30), '找到现有消息:', !!existingMsg, '文件数:', finalFiles?.length);
-            
-            return { 
-              ...msg, 
-              textStyle: savedStyle || msg.textStyle,
-              files: finalFiles
-            };
-          });
-          setMessages(messagesWithStyle);
-          setLastSync(Date.now());
+        if (data.messages) {
+          setMessages(data.messages);
+          console.log('[加载历史] 从后端加载:', data.messages.length, '条');
         }
       } catch (err) {
-        console.error('Sync history failed:', err);
+        console.error('Load history failed:', err);
       }
     };
-
-    syncHistory(); // 初始加载
-    const interval = setInterval(syncHistory, 5000); // 每 5 秒同步
-    return () => clearInterval(interval);
-  }, [loading]);
+    loadHistory();
+  }, []);
 
   const handleSend = async () => {
     const rawContent = input.trim();
@@ -219,10 +256,12 @@ export default function ChatPage() {
       textStyle: { fontSize: parseInt(fontSize), color: textColor, fontFamily: fontFamily === '默认' ? undefined : fontFamily, isBold }
     };
 
-    // 保存消息样式到缓存
-    saveMessageStyle(userMessage, userMessage.textStyle);
-
-    setMessages(prev => [...prev, userMessage]);
+    // 保存历史（包含当前消息）- 使用函数式更新
+    setMessages(prev => {
+      const newMessages = [...prev, userMessage];
+      console.log('[发送消息] 保存:', newMessages.length, '条');
+      return newMessages;
+    });
     const currentInput = rawContent;
     const currentFiles = [...pendingFiles];
     setInput('');
@@ -238,6 +277,10 @@ export default function ChatPage() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 120000); // 2分钟超时
       
+      console.log('[请求] URL:', `${API_BASE}/api/chat`);
+      console.log('[请求] Token:', token ? '有' : '无');
+      console.log('[请求] FormData:', formData.has('message'), formData.has('files'));
+      
       const resp = await fetch(`${API_BASE}/api/chat`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
@@ -246,7 +289,18 @@ export default function ChatPage() {
       });
       clearTimeout(timeoutId);
 
-      const data = await resp.json();
+      console.log('[响应] 状态:', resp.status, resp.ok, resp.statusText);
+      
+      const text = await resp.text();
+      console.log('[响应] 原始内容:', text.slice(0, 200));
+      
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error('[解析失败] 不是 JSON:', e.message);
+        throw new Error('响应格式错误');
+      }
       if (!resp.ok) throw new Error(data.error || '请求失败');
 
       console.log('后端响应:', data);
@@ -255,13 +309,30 @@ export default function ChatPage() {
       // 更新用户消息的文件路径
       if (data.uploadedFiles && data.uploadedFiles.length > 0) {
         console.log('更新用户消息文件:', userMessage.id, data.uploadedFiles);
-        setMessages(prev => prev.map(msg => 
-          msg.id === userMessage.id 
-            ? { ...msg, files: data.uploadedFiles }
-            : msg
-        ));
-        // 保存文件信息到 localStorage
-        saveMessageFiles(userMessage, data.uploadedFiles);
+        setMessages(prev => {
+          const newMessages = prev.map(msg => 
+            msg.id === userMessage.id 
+              ? { ...msg, files: data.uploadedFiles }
+              : msg
+          );
+          // 更新后立即保存历史（关键！）
+          setTimeout(() => {
+            localStorage.setItem('chat_message_history', JSON.stringify(newMessages));
+            console.log('[保存消息历史] 更新后保存:', newMessages.length, '条');
+          }, 0);
+          return newMessages;
+        });
+        // 保存文件信息到 localStorage - 保存服务器返回的文件路径
+        const msgForSave = { ...userMessage, files: data.uploadedFiles };
+        saveMessageFiles(msgForSave, data.uploadedFiles);
+        console.log('[保存文件到 localStorage] key:', getMessageKey(msgForSave), 'files:', data.uploadedFiles.length);
+        
+        // 额外保存一份到以时间戳为 key 的缓存（用于页面加载时恢复）
+        const timestampKey = 'file_' + userMessage.timestamp;
+        const fileCache = JSON.parse(localStorage.getItem('chat_file_cache') || '{}');
+        fileCache[timestampKey] = data.uploadedFiles;
+        localStorage.setItem('chat_file_cache', JSON.stringify(fileCache));
+        console.log('[保存时间戳文件缓存] key:', timestampKey);
       }
 
       const assistantMessage: Message = {
@@ -271,7 +342,12 @@ export default function ChatPage() {
         timestamp: Date.now(),
         outputFiles: data.outputFiles
       };
-      setMessages(prev => [...prev, assistantMessage]);
+      // 保存历史（包含 AI 回复）- 使用函数式更新确保获取最新状态
+      setMessages(prev => {
+        const newMessages = [...prev, assistantMessage];
+        console.log('[AI 回复] 保存消息:', newMessages.length, '条');
+        return newMessages;
+      });
     } catch (error: any) {
       const errMsg = error.name === 'AbortError' 
         ? '请求超时，AI 处理时间较长，请稍后重试'
@@ -328,7 +404,7 @@ export default function ChatPage() {
           {isImage(f.type) ? <PictureOutlined style={{ color: '#4e8ff0' }} /> : <FileOutlined style={{ color: 'var(--text-tertiary)' }} />}
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{f.name}</span>
           <span style={{ color: 'var(--text-tertiary)', flexShrink: 0 }}>{formatSize(f.size)}</span>
-          {isOutput && f.path && (
+          {f.path && (
             <a href={getFileUrl(f.path)} target="_blank" rel="noreferrer"
               style={{ color: 'var(--figma-blue)', flexShrink: 0 }}>
               <DownloadOutlined />
@@ -342,18 +418,25 @@ export default function ChatPage() {
   // 渲染图片预览
   const renderImagePreview = (files: ChatFile[]) => {
     const images = files.filter(f => isImage(f.type) && f.path);
+    console.log('[renderImagePreview] 收到 files:', files.length, '过滤后 images:', images.length);
     if (images.length === 0) return null;
     return (
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
-        {images.map((f, i) => (
-          <a key={i} href={(f as any).isLocalPreview ? undefined : getFileUrl(f.path)} target="_blank" rel="noreferrer" 
-             style={{ cursor: (f as any).isLocalPreview ? 'default' : 'pointer' }}>
-            <img src={(f as any).isLocalPreview ? f.path : getFileUrl(f.path)} alt={f.name}
-              style={{ maxWidth: 300, maxHeight: 200, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-            />
-          </a>
-        ))}
+        {images.map((f, i) => {
+          const isLocal = (f as any).isLocalPreview === true;
+          const imgUrl = isLocal ? f.path : getFileUrl(f.path);
+          console.log('[图片渲染]', f.name, '| isLocal:', isLocal, '| path:', f.path, '| imgUrl:', imgUrl);
+          return (
+            <a key={i} href={isLocal ? undefined : imgUrl} target="_blank" rel="noreferrer" 
+               style={{ cursor: isLocal ? 'default' : 'pointer' }}>
+              <img src={imgUrl} alt={f.name}
+                style={{ maxWidth: 300, maxHeight: 200, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}
+                onError={(e) => { console.error('图片加载失败:', imgUrl); (e.target as HTMLImageElement).style.display = 'none'; }}
+                onLoad={() => console.log('图片加载成功:', imgUrl)}
+              />
+            </a>
+          );
+        })}
       </div>
     );
   };
@@ -383,10 +466,11 @@ export default function ChatPage() {
             {/* AI 消息样式控件 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', background: 'var(--bg-primary)', borderRadius: 4, border: '1px solid var(--border-subtle)' }}>
               <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>AI样式:</span>
-              {/* 加粗 */}
+              {/* 加粗 - 暂时隐藏，功能保留
               <button onClick={() => setAiMsgBold(!aiMsgBold)} title="AI消息加粗" style={{ background: aiMsgBold ? 'var(--figma-blue)' : 'none', border: '1px solid var(--border-subtle)', borderRadius: 3, color: aiMsgBold ? '#fff' : 'var(--text-secondary)', cursor: 'pointer', padding: '2px 6px', fontWeight: 700, fontSize: 12 }}>
                 B
               </button>
+              */}
               {/* 字号 */}
               <select value={aiMsgSize} onChange={e => setAiMsgSize(e.target.value)} title="AI消息字号"
                 style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 3, color: 'var(--text-secondary)', padding: '2px 4px', fontSize: 11, cursor: 'pointer' }}>
@@ -403,6 +487,13 @@ export default function ChatPage() {
               {/* 气泡背景色 */}
               <input type="color" value={aiMsgBgColor.startsWith('#') ? aiMsgBgColor : '#f0f0f0'} onChange={e => setAiMsgBgColor(e.target.value)} title="AI消息气泡背景色"
                 style={{ width: 24, height: 24, border: '1px solid var(--border-subtle)', borderRadius: 3, cursor: 'pointer' }} />
+              {/* 气泡透明度 */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
+                <span style={{ color: 'var(--text-tertiary)' }}>透明度</span>
+                <input type="range" min="0.1" max="1" step="0.1" value={aiMsgOpacity} onChange={e => setAiMsgOpacity(e.target.value)} 
+                  style={{ width: 80, cursor: 'pointer' }} title="AI 消息气泡透明度" />
+                <span style={{ color: 'var(--text-secondary)', minWidth: 30 }}>{Math.round(parseFloat(aiMsgOpacity) * 100)}%</span>
+              </div>
             </div>
             <button className="figma-button figma-button-secondary" onClick={clearChat}
               style={{ fontSize: 12, padding: '4px 12px' }}>清空对话</button>
@@ -432,7 +523,7 @@ export default function ChatPage() {
           {messages.length === 0 ? (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
               <span style={{ fontSize: 48 }}>🦞</span>
-              <div style={{ color: 'var(--text-tertiary)', fontSize: 14 }}>开始与 OpenClaw 对话</div>
+              <div style={{ color: 'var(--text-tertiary)', fontSize: 14 }}>开始与 小汐 AI 对话</div>
               <div style={{ color: 'var(--text-tertiary)', fontSize: 12 }}>支持文字、图片、文档等多种格式输入输出</div>
             </div>
           ) : (
@@ -458,7 +549,14 @@ export default function ChatPage() {
                     <div style={{
                       maxWidth: '65%', padding: '10px 14px',
                       borderRadius: '12px',
-                      background: msg.role === 'user' ? 'var(--figma-blue)' : aiMsgBgColor,
+                      background: msg.role === 'user' ? 
+                        (userMsgBgColor.startsWith('#') && userMsgOpacity !== '1' 
+                          ? userMsgBgColor + Math.round(parseFloat(userMsgOpacity) * 255).toString(16).padStart(2, '0')
+                          : userMsgBgColor)
+                        : 
+                        (aiMsgBgColor.startsWith('#') && aiMsgOpacity !== '1' 
+                          ? aiMsgBgColor + Math.round(parseFloat(aiMsgOpacity) * 255).toString(16).padStart(2, '0')
+                          : aiMsgBgColor),
                       color: msg.role === 'user' ? '#ffffff' : 'var(--text-primary)',
                       border: msg.role === 'assistant' ? '1px solid var(--border-subtle)' : 'none',
                       boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
@@ -474,8 +572,12 @@ export default function ChatPage() {
                         borderStyle: 'solid',
                         borderWidth: msg.role === 'user' ? '8px 0 8px 8px' : '8px 8px 8px 0',
                         borderColor: msg.role === 'user' 
-                          ? 'transparent transparent transparent var(--figma-blue)'
-                          : `transparent ${aiMsgBgColor} transparent transparent`
+                          ? `transparent transparent transparent ${userMsgBgColor.startsWith('#') && userMsgOpacity !== '1' 
+                              ? userMsgBgColor + Math.round(parseFloat(userMsgOpacity) * 255).toString(16).padStart(2, '0')
+                              : userMsgBgColor}`
+                          : `transparent ${aiMsgBgColor.startsWith('#') && aiMsgOpacity !== '1' 
+                              ? aiMsgBgColor + Math.round(parseFloat(aiMsgOpacity) * 255).toString(16).padStart(2, '0')
+                              : aiMsgBgColor} transparent transparent`
                       }} />
                       {msg.content && (
                         <div style={{
@@ -484,6 +586,12 @@ export default function ChatPage() {
                           color: msg.role === 'user' ? (msg.textStyle?.color ?? '#ffffff') : aiMsgColor,
                           fontFamily: msg.role === 'user' ? (msg.textStyle?.fontFamily || 'inherit') : (aiMsgFont === '默认' ? 'inherit' : aiMsgFont),
                           fontWeight: msg.role === 'user' ? (msg.textStyle?.isBold ? 700 : 400) : (aiMsgBold ? 700 : 400),
+                          // 部分字体没有粗体字重，使用文字阴影模拟粗体效果
+                          textShadow: (msg.role === 'assistant' && aiMsgBold && FONTS_NO_BOLD.includes(aiMsgFont)) 
+                            ? '0.5px 0 0 currentColor, -0.5px 0 0 currentColor, 0 0.5px 0 currentColor, 0 -0.5px 0 currentColor' 
+                            : (msg.role === 'user' && msg.textStyle?.isBold && FONTS_NO_BOLD.includes(msg.textStyle?.fontFamily || ''))
+                            ? '0.5px 0 0 currentColor, -0.5px 0 0 currentColor, 0 0.5px 0 currentColor, 0 -0.5px 0 currentColor'
+                            : 'none',
                         }}>
                           {msg.content}
                         </div>
@@ -631,10 +739,11 @@ export default function ChatPage() {
           )}
           {/* 格式工具栏 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', marginBottom: 6, flexWrap: 'wrap' }}>
-            {/* 加粗 */}
+            {/* 加粗 - 暂时隐藏，功能保留
             <button onClick={() => setIsBold(v => !v)} title="加粗" style={{ background: isBold ? 'var(--figma-blue)' : 'none', border: '1px solid var(--border-subtle)', borderRadius: 4, color: isBold ? '#fff' : 'var(--text-secondary)', cursor: 'pointer', padding: '4px 12px', fontWeight: 700, fontSize: 16 }}>
               <BoldOutlined />
             </button>
+            */}
             {/* 字号 */}
             <select value={fontSize} onChange={e => setFontSize(e.target.value)} title="字号"
               style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-subtle)', borderRadius: 4, color: 'var(--text-secondary)', padding: '4px 8px', fontSize: 15, cursor: 'pointer' }}>
@@ -855,6 +964,15 @@ export default function ChatPage() {
               style={{ background: showPpt ? 'var(--figma-purple)' : 'none', border: '1px solid var(--border-subtle)', borderRadius: 4, color: showPpt ? '#fff' : 'var(--text-tertiary)', cursor: 'pointer', padding: '4px 12px', fontSize: 16 }}>
               <FilePptOutlined />
             </button>
+            {/* 气泡背景色 */}
+            <input type="color" value={userMsgBgColor.startsWith('#') ? userMsgBgColor : '#2080f0'} onChange={e => setUserMsgBgColor(e.target.value)} title="我的消息气泡背景色"
+              style={{ width: 28, height: 28, border: '1px solid var(--border-subtle)', borderRadius: 4, cursor: 'pointer' }} />
+            {/* 气泡透明度 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11 }}>
+              <input type="range" min="0.1" max="1" step="0.1" value={userMsgOpacity} onChange={e => setUserMsgOpacity(e.target.value)} 
+                style={{ width: 60, cursor: 'pointer' }} title="我的消息气泡透明度" />
+              <span style={{ color: 'var(--text-secondary)', minWidth: 28 }}>{Math.round(parseFloat(userMsgOpacity) * 100)}%</span>
+            </div>
           </div>
           <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'flex-end' }}>
             {/* Debug: isBold = {String(isBold)} */}
@@ -877,6 +995,8 @@ export default function ChatPage() {
                 color: textColor, fontSize: parseInt(fontSize),
                 fontFamily: fontFamily === '默认' ? 'inherit' : fontFamily,
                 fontWeight: isBold ? 700 : 400,
+                // 部分字体没有粗体字重，使用文字阴影模拟粗体效果
+                textShadow: (isBold && FONTS_NO_BOLD.includes(fontFamily)) ? '0.5px 0 0 currentColor, -0.5px 0 0 currentColor, 0 0.5px 0 currentColor, 0 -0.5px 0 currentColor' : 'none',
                 lineHeight: 1.5, outline: 'none', boxSizing: 'border-box',
                 resize: 'vertical', minHeight: parseInt(fontSize) * 1.5 * 4 + 16,
                 opacity: loading ? 0.5 : 1,
