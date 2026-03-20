@@ -275,7 +275,7 @@ export default function ChatPage() {
 
       const token = localStorage.getItem('auth_token') || 'wj12345';
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2分钟超时
+      const timeoutId = setTimeout(() => controller.abort(), 300000); // 2分钟超时
       
       console.log('[请求] URL:', `${API_BASE}/api/chat`);
       console.log('[请求] Token:', token ? '有' : '无');

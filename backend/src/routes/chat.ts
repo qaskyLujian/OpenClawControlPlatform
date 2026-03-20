@@ -5,6 +5,7 @@ import multer from 'multer';
 import os from 'os';
 import path from 'path';
 import fs from 'fs-extra';
+// import { connectGatewayWS } from '../utils/gateway-ws'; // 临时禁用 WebSocket
 
 const router = Router();
 const execAsync = promisify(exec);
@@ -125,10 +126,8 @@ router.post('/', upload.array('files', 5), async (req: any, res) => {
         : `用户上传了以下文件：\n${fileDescs.join('\n')}\n请读取并分析这些文件内容。`;
     }
 
-    // 转义消息
+    // 使用 CLI 调用 OpenClaw（临时回退，WebSocket 调试中）
     const escaped = fullMessage.replace(/'/g, "'\\''");
-
-    // 使用主会话（和 TUI/Telegram/WhatsApp 共享同一会话上下文）
     const sessionId = await getMainSessionId();
     const { stdout } = await execAsync(
       `${OPENCLAW} agent --agent main --session-id ${sessionId} --message '${escaped}' --json`,
